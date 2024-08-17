@@ -1,3 +1,16 @@
+Metadata-Version: 2.1
+Name: data-toolkit
+Version: 0.1.0
+Summary: A toolkit for data loading, validation, transformation, and visualization
+Home-page: https://github.com/MahbubHossainFaisal/Data_Engineering_Concepts/tree/main/Python_Package_Practice
+Author: Mahbub Hossain Faisal
+Author-email: mahbbubhossain249@gmail.com
+Classifier: Programming Language :: Python :: 3
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Requires-Python: >=3.6
+Description-Content-Type: text/markdown
+
 # Data Toolkit
 
 ## Data Loading Module
