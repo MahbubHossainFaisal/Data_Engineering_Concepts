@@ -1,0 +1,7 @@
+setup.py
+class_package/__init__.py
+class_package/greetings.py
+class_package.egg-info/PKG-INFO
+class_package.egg-info/SOURCES.txt
+class_package.egg-info/dependency_links.txt
+class_package.egg-info/top_level.txt
