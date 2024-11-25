@@ -1,3 +1,4 @@
+INSERT INTO players
 with years as
 (
 select * from generate_series(1996,2022) as season
