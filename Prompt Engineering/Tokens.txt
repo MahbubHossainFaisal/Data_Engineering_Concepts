@@ -1,0 +1,25 @@
+-- Tokenization
+	- What is tokenization
+	- Tokens have a limitations based on the llm model
+	- How to check number of tokens in python
+	- Approaches to avoid hitting token limit
+		- Shortening the prompt
+		- Chunking
+		- Windowed chunks
+		- Summarization
+		
+-- Log probabilities
+	- What is it
+	- What is temperature parameter in chatgpt
+	- What happens if we increase temperature values and viseversa
+	- What is the relation of best of parameter with temperature parameter
+	
+-- AI Hallucinations
+	- What make AI hallucinate?
+	- How to avoid hallucinate
+	- What prompts should be given to AI to avoid hallucinate.
+	
+-- Chat models vs Reasoning models
+	- Explain their descriptive differences
+	- Explain their characteristic differences
+	- Give me a comparison table of when we should use chat models and when reasoning models.
