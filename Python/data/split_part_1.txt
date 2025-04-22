@@ -1,0 +1,5 @@
+2023-10-15 08:23:45 INFO  [MainThread] Server started on port 8080  
+2023-10-15 08:24:12 DEBUG [Worker-1] Processing request ID: 74291  
+2023-10-15 08:24:13 WARN  [Worker-2] High memory usage detected (82%)  
+2023-10-15 08:25:07 ERROR [AuthService] Login failed for user 'admin' - invalid credentials  
+2023-10-15 08:25:34 INFO  [DBManager] Database backup completed successfully  

@@ -1,0 +1,5 @@
+2023-10-15 08:30:00 INFO  [Cron] Running scheduled job 'nightly_reports'  
+2023-10-15 08:30:47 ERROR [Database] Deadlock detected on table 'orders'  
+2023-10-15 08:31:12 INFO  [API] GET /api/v1/products - 200 OK  
+2023-10-15 08:32:05 WARN  [Security] 3 failed login attempts from 203.0.113.42  
+2023-10-15 08:32:30 DEBUG [Worker-4] Processing completed in 142ms

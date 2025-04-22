@@ -1,0 +1,15 @@
+2023-10-15 08:23:45 INFO  [MainThread] Server started on port 8080  
+2023-10-15 08:24:12 DEBUG [Worker-1] Processing request ID: 74291  
+2023-10-15 08:24:13 WARN  [Worker-2] High memory usage detected (82%)  
+2023-10-15 08:25:07 ERROR [AuthService] Login failed for user 'admin' - invalid credentials  
+2023-10-15 08:25:34 INFO  [DBManager] Database backup completed successfully  
+2023-10-15 08:26:18 DEBUG [Network] Ping response: 24ms  
+2023-10-15 08:27:05 ERROR [PaymentGateway] Transaction timed out (TXID: XF-8872)  
+2023-10-15 08:27:22 INFO  [MainThread] New connection from 192.168.1.105  
+2023-10-15 08:28:40 WARN  [Cache] Cache miss for key 'user_profile_4892'  
+2023-10-15 08:29:15 DEBUG [Worker-3] Sending email to user@example.com  
+2023-10-15 08:30:00 INFO  [Cron] Running scheduled job 'nightly_reports'  
+2023-10-15 08:30:47 ERROR [Database] Deadlock detected on table 'orders'  
+2023-10-15 08:31:12 INFO  [API] GET /api/v1/products - 200 OK  
+2023-10-15 08:32:05 WARN  [Security] 3 failed login attempts from 203.0.113.42  
+2023-10-15 08:32:30 DEBUG [Worker-4] Processing completed in 142ms
