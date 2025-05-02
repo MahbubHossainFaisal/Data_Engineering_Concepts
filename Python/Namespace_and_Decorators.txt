@@ -1,0 +1,17 @@
+Namespace and Decorators.
+
+Namespace 
+	- Namespace definition
+	- Types of namespace and example
+	- Scope
+	- Relation between Namespace and Scope
+	- LEGB Rule
+	- Local score vs Global Scope
+		- You can view global scope variable in local scope but can't change it (Only with global keyword you can do that but that's not a good practice)
+		- It is also possible to add global variable from local scope
+		- Every parameter of a function is a local variable
+	- built-in scope
+		- you can overwrite built in functions by using their name
+	- enclosing scope
+		- Example of enclosing scope
+		- How to use the enclosing scope variable to local scope.
