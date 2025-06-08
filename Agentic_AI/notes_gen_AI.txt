@@ -178,4 +178,32 @@ Data Ingestion in Langchain:
 	- {add any important part if missing on above points}
 	
 	
-- Groq API Key -> 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
+
+
+
+-- LCEL
+	- Definition
+	- Components of LCEL
+	- Explain about GROQ platform.
+	- Explain the services this platform provides.
+	- What is an AI Inference
+	- Delivering Fast AI Inference with the LPU (explain in detail)
+	- Explain what problem GROQ solve?
+	- What is Langchain_core library?
+	- Explain system_message and human_message ! Why we need both? Can't do this in a single prompt? If not then why we can't?
+	- What is the difference of using Human_Message and System_Message seperately than in under ChatPromptTemplate.from_messages?(Explain with example)
+	- What from_messages() does and what to_messages() does in ChatPromptTemplate?
+	- What is the need of chains? How chains make things easier (Explain with example)
+	
+	
+-- Langserve
+	- What is it?
+	- What is the need of it?
+	- What problem it solves? (Explain with scenario)
+	- What benefits it provide?
+	- Why we need fastapi and uvicorn installation in order to use langserve?
+	- Is langserve is a wrapper over FastAPI?
+	- Using all make a basic app with langserve
+	
+-- Chatbot with Message History
+	- 
