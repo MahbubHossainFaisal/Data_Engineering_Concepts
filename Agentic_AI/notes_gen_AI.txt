@@ -1,0 +1,181 @@
+Act as a 30 years experienced Data Engineer who also teach data engineering.
+You will teach me about Pydantic. Please follow the rules while replying to my questions.
+I will provide you points that you need to discuss. Please discuss those with great details.
+Rules:
+	- You have to cover the fundamentals
+	- You have to go in detail
+	- If I didn't add any important topic, also add that details in your response.
+	- Add questions that are must needed to be interview ready.
+	- Properly validate and verify your response, nothing important should be missed from the discussion.
+	- Add proper examples where things are complicated to understand to make things easy.
+	
+at last, your goal would be to provide detail in such a way that would clear my fundamentals and make me interview ready in data validation with pydantic perspective.
+
+
+When you are ready, ask me for the topics!
+
+
+- What is Pydantic
+- Why use Pydantic
+- Why exactly this is used?
+	- In terms of API responses create a scenario context to understand pydantic in detail.
+
+- How this would be helpful while creating LLM applications
+- Create a real life use case to perfectly explain the need of Pydantic and how it will be used in that scenario
+
+- Implementation Example
+	- Import Pydantic
+	- a person class which will inherit Basemodel from pydantic
+	- Difference between dataclass decorator vs Basemodel with example (in terms of data validation)
+	- What is Optional? (From typing import Optional)
+		- Make an example where you will use Optional with Basemodel for an employee class.
+		- Pydantic validates types even for optional fields when values are provided
+	- Show an example of classroom class, where you will have a list of string Pydantic validatin. (Provide Example)
+	- Similar examples of  tuples, dictionaries or any important data structure.
+	- Give a medium level complex scenario of using pydantic
+	- Provide a complex scenario of using pydantic
+	
+	
+
+Act as a top tech company GEN AI Engineering Lead who also teach Gen AI.
+You will teach me about Data loaders in Gen AI. Please follow the rules while replying to my questions.
+I will provide you points that you need to discuss. Please discuss those with great details.
+Rules:
+	- You have to cover the fundamentals
+	- You have to go in detail
+	- If I didn't add any important topic, also add that details in your response.
+	- Add questions that are must needed to be interview ready.
+	- Properly validate and verify your response, nothing important should be missed from the discussion.
+	- Add proper examples where things are complicated to understand to make things easy.
+	- Remember you are a teacher! So each step of your response should be like proper way of teaching!
+	
+at last, your goal would be to provide detail in such a way that would clear my fundamentals in data loaders perspective.
+
+When you are ready, ask me for the topics!
+	
+Data Ingestion in Langchain:
+	- Explain text loader in langchain from langchain community
+	- How to load a text document. Give an example 
+	- How to read a pdf file with PyPDFLoader. (Give example with proper input output sample)
+	- Show some must know parameters and features of PyPDFLoader with example.
+	- What is Web base loader.(Give example with proper input output sample)
+	- Show some must know parameters and features of Web base loader with example.
+	- How can we integrate beautifulsoup4 with web base loader.
+	- Summarize attention all you need research paper and then explain about arxiv format with example.
+	- arxivLoader might need pymupdf loader. (Explain)
+	- What is Wikipedialoader.(Give example with proper input output sample)
+	- Show some must know parameters and features of Wikipedialoader with example.
+	
+	
+	
+- Data transformation in Langchain
+ - What is the need of converting documents into data chunks?
+ - explain langchain-text-splitters library in detail with proper example.
+  - How we can recursively split texts by characters in langchain using RecursiveTextSplitter
+  - Explain the important parametes of RecursiveTextSplitter
+  - Explain create_documents()
+  - Why create_documens() can't work on document types instead we need split_documents() for it.
+  - Explain with example what create_document() and split_documents() do and what is their key differences and purpose?
+  
+  
+ - Html HEADER TEXT Splitter
+	- What is the purpose of it?
+	- What it does?
+	- How it does?
+	- Example with real usecase
+	- Features?
+	- Important Parameters?
+	- Limitations?
+	
+ - Recursive JSON TEXT Splitter
+	- What is the purpose of it?
+	- What it does?
+	- How it does?
+	- Example with real usecase
+	- Features?
+	- Important Parameters?
+	- Limitations?
+	
+	
+- Embeddings
+	- Purpose: Converting text into vectors
+	- Give an example of OPENAI Embeddings code.
+	- Explain the parameters of OPENAI embeddings
+	- Explain the entire process of 
+		- Loading text as langchain documents
+		- Splitting with Recursive text splitters
+		- Converting them into vector embeddings
+		- Insert those embeddings into Chroma DB
+		- Searching/querying particular text on that DB.
+		
+		
+- FAISS
+	- What is it?
+	- What is the purpose of it?
+	- Discuss the important parameters of this vector store
+	- Explain the similarity with score feature of FAISS
+	- How to use FAISS as a retriever?
+		- Give a detailed example with code
+	- Saving and loading example of FAISS Vector Store.
+	- Discuss important parameters in in local load of FAISS.
+
+- Chroma DB
+	- What is it?
+	- What is the purpose of it?
+	- Any difference with FAISS?
+	- Discuss the important parameters of this vector store
+	- Explain the similarity with score feature of CHROMADB
+	- How to use CHROMADB as a retriever?
+		- Give a detailed example with code
+	- Saving and loading example of CHROMADB Vector Store.
+	- Discuss important parameters in in local load of CHROMADB.
+	
+	
+
+-- Langchain Components
+	- what load_dotenv do?
+	- What os.environ and os.getenv does?
+	- We have to make Langchain_Tracing_V2 = True. Why is that?
+	- Also we have to make a project name using os.environ to track logs in langsmith. Why and how?
+	- When we require langchain-openai library?
+	- What is the purpose of use of ipykernal?
+	- Explain ChatPromptTemplate.
+		- Discuss important functions of ChatPromptTemplate with code example
+		- Explain about system prompt and user prompt
+	- What is a chain? Explain in detail
+		- What is the purpose of chain?
+		- How it works?
+		- Important functions of chain
+		- What things you can combine in chains?
+		
+	- What is stroutputparser?
+		- What problem it solves?
+		- Provide example
+		
+	- Using everything above code a basic llm app which reads user input and provide output (If anything not mentioned in the above topics include those as well if necessary)
+	
+	
+- How to work with a web content using Langchain
+	- what langchain_community library does?
+	- First we have to pick a web page and scrape the data using beautifulsoup4.
+		- What webBaseLoader does? Explain it's purpose and need. Provide an example with code 
+		- After loading the documents we need to convert those document into chunks (using RecursiveTextSplitter). Why? What if we do not?
+		- Then convert those chunks into vector embeddings. Why? What if we do not? Why need to calculate cosine similarity? 
+		- After that we need to store those vector embeddings into a storage (FAISS) . Why? What if we do not?
+		- 	
+	- Using everything above code a basic llm app which reads user input and provide output (If anything not mentioned in the above topics include those as well if necessary)
+	
+	
+-- Retrievers and chains
+	- What is retrieval chain? Provide details with example.
+	- What is document chain? Provide details with example.
+	- Explain create_stuffs_documents_chain. How it works? What is the need (explain with a scenario)?
+	- (from langchain_core.documents import Document) -> Explain this and how it is related to create_stuffs_documents_chain?
+	- What is a retriever? Explain the need and purpose of it!
+	- What is the relation of retrievar with Vector Store DB?
+	- How we convert vector storage db into a retrievar?
+	- What create_retrieval_chain does?
+	- {add any important part if missing on above points}
+	
+	
+- Groq API Key -> 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
