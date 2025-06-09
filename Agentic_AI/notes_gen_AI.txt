@@ -206,4 +206,10 @@ Data Ingestion in Langchain:
 	- Using all make a basic app with langserve
 	
 -- Chatbot with Message History
-	- 
+	- Explain about ChatMessageHistory
+	- Explain about BaseChatMessageHistory
+	- Explain about RunnableWithMessageHistory
+	- Make a get_session_history function which will be str type and return type BaseChatMessageHistory and Which will create object for ChatMessageHistory and return that.
+	Then how to use RunnableWithMessageHistory with it by making a config.
+	-  We can create different configs for different sessions. Give code examples of how different sessions can be created how they works!
+	
