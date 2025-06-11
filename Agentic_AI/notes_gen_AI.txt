@@ -213,3 +213,52 @@ Data Ingestion in Langchain:
 	Then how to use RunnableWithMessageHistory with it by making a config.
 	-  We can create different configs for different sessions. Give code examples of how different sessions can be created how they works!
 	
+-- Combining ChatPromptTemplate with ChatMessageHistory
+	- in ChatPromptTemplate.from_messages what is the purpose of MessagePlaceHolder parameter?
+		- MessagesPlaceHolder(variable="messages")
+		- Explain with proper example and details
+	- If you add multiple variables under ChatPromptTemplate.from_messages. How should you incorporate that in runnableWithMessageHistory? Explain with example!
+	- Create a code example including all of it which will be able to handle multiple session history!
+	
+-- Managing conversation history
+	- If message history left unmanaged, the list of message can be unbounded and potentially overflow the context size of llm. Explain in detail with proper example scenario.
+	- using "trim_messages" to limit messages. Explain about it with example. (What is the purpose? What problem it solves? How it solves?)
+	- Explain the important parameters of trim_messages.(Ex. Max_tokens, strategy, token_counter,include_system,allow_partials,start_on and many more if there)
+	- What itemgetter and runnablepassthrough does?
+	- How you pass a trimmer in a chain (with itemgetter, runnablepassthrough)?
+	- Create a basic llm code with example including all of it which will use ChatPromptTemplate and be able to handle multiple session history and as well as trim message history
+	
+-- Agentic AI vs AI Agents
+	- Differences between these two
+		- Definition
+		- Detailed comparison
+		- Example
+		- Agentic AI tends to solve more complex problems than AI Agents. Explain with example scenario.
+		- Differentiate them based on functionality, decision making, entity(single,multiple), Examples (Customer service agent as Agents and Smart home systems which have multiple agents)
+	- Some characteristics of Agentic AI
+		- Perception
+		- Reasoning
+		- Action
+		- Learning
+		
+		
+		
+-- LangGraph
+	- Definition in detail
+	- Features of LangGraph
+	- How it is inspired by Pregel and Apache Beam?
+	- For what purpose LangGraph is built?
+	- What problem LangGraph solve?
+	- LangGraph is a library for building stateful, multi-actor applications with LLMs. Explain in depth
+	- Explain about LangGraph components (like Memory, Human in the loop etc.)
+	- Make a 5 years old understand How LangGraph works actually (Use diagrams where necessary).
+	
+-- A simple workflow using LangGraph
+	- Nodes (Python functions -> Performing some tasks)
+	- Edges (Connect the nodes)
+		- We can also have conditional edges
+	- State (State schema serves as the input for all nodes and edges)
+	- StateGraph (Structure of the entire graph)
+	- Make a workflow (Flowchart) using above concepts
+	- Code your workflow with LangGraph. (Should be very basic but fundamentally enough to understand)
+	- Explain each step of your code.
