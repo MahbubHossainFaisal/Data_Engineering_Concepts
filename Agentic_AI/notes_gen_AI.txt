@@ -262,3 +262,53 @@ Data Ingestion in Langchain:
 	- Make a workflow (Flowchart) using above concepts
 	- Code your workflow with LangGraph. (Should be very basic but fundamentally enough to understand)
 	- Explain each step of your code.
+	
+-- LangSmith Tracing Basics
+	- tracing with @traceable. Explain this decorator in detail.(Purpose,need etc)
+	- Explain tracing concept in LangSmith with Diagram.
+		- Anytime user runs an application, a new trace is created in LangSmith 
+		- In a rag application we have two main runs.
+			- Retrieve Documents function
+			- Generate response function
+		- Runs are nested and recursive concept
+		- In each trace, we have a root run and below that we have Retrieve Documents and Generate Response runs! Even these
+		runs can have their nested sub runs that have even more specific information for a piece of logic.
+		
+	- How can we add metadata with @traceable and what problem it solves? What benefits it provide?
+	
+	- What is metadata passing at runtime? Why we need it?
+	
+-- Types of runs in LangSmith
+	- LLM 
+	- Retriever
+	- Tool
+	- Chain
+		- Run type is default to chain
+	- Prompt
+	- Parser
+	- Explain each run types with their use case and proper example.
+	
+	
+- Langsmith conversational Threads
+	- What is it ?
+	- What is the need and purpose of it?
+	- A thread is a series of traces where each trace is the invocation of your llm app. (Explain in details)
+	- How thread id works in conversational thread? How it helps us filtering in langsmith
+	- Provide an entire scenario based example to understand properly (Bring any missed points that is necessary to understand)
+	
+- Testing your LLM application using LangSmith
+	- Datasets
+		- It is very much important to test your llm application due to it's non deterministic nature.
+		- In order to evaluate our application, we need datasets which are actually list of examples.
+		- In order to test and evaluate our application, we need to create good amount of evaluation datasets.
+		- Show what are the different ways of how we can generate datasets to evaluate our application.
+		- What are resource tags in LangSmith while creating datasets?
+		- How can we create an empty dataset in LangSmith, takes the id and upload our dataset examples from Jupyter Notebook using that ID and then tag that version. Explain with code in details.
+		- What is the purpose of tags in above context?
+		- Now how we can add one of our trace response (Input output) with the golden examples that we have created in the dataset and what might be the reason of doing that?
+		- We can create seperate datasets for retrieve documents and generate response or many more subruns for validating. Explain in details.
+		- What does it mean to create a schema (Input schema/ output schema) on your datasets in LangSmith? Explain in details
+		- How can we add AI generated examples which will be generated using our already given dataset examples.
+	 	- We can keep versions and always add new examples if needed in newer versions. Explain in LangSmith context.
+		- We can also splits our datasets examples into crucial, important, less important etc according to need. Explain in LangSmith context.
+		- We can clone, downlaod, add our datasets to use in some other projects as well.
