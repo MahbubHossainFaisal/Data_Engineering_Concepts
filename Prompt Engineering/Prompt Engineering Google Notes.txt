@@ -64,6 +64,43 @@ Prompt Engineering
 			- at high temperatures, the model's output becomes excessively random, increasing the probability that a randomly chosen word or phrase will, by chance, lead back to a prior state,
 			creating a loop due to the vast number of available options.
 		
+	- Top-K and Top-P Part 02
+		-  Key Differences Between Top-P and Top-K
+		- Top-K is Better When
+			- Deterministic Outputs 
+			- Performance Matters
+		- Top-P is Better when 
+			- Creativity and Diversity are priorities 
+			- Contextual Adaptability is key
+		- Recommended settings for temperature,top-K,top-P
+		- Using both Top-K and Top-P simultaneously can lead to unpredictable results. Stick to one or the other .
+		- Limitations of Top-K and top-P
+		- When top-K and top-P interacts together
+			- Outcomes can be
+				- Top-P dominates
+				- Top-K dominates
+				- Conflict
+				
+		- Why This is Usually Not Recommended to use them both together
+			- Over-constraining
+			- Redundancy
+			- Debugging Difficulty
+		- Practical Advice to use top-K and top-P
+			- Use One or the Other (Not Both)
+			- If You Must Combine Them
+				- Ensure top_k is large enough to avoid truncation (e.g., top_k=50, top_p=0.7).
+				- Monitor outputs for coherence.
+		- Step-by-Step Order in Sampling
+			- Model computes logits (raw scores for each token).
+
+			- Top-K filtering (if used): Selects the top K tokens by probability.
+
+			- Top-P filtering (if used): From the remaining tokens (after Top-K), selects the smallest set where cumulative probability ≥ P.
+
+			- Temperature scaling: Adjusts the logits of the final candidate tokens (those that survived Top-K/Top-P).
+
+S			- oftmax + Sampling: Converts scaled logits to probabilities and samples the next token.
+		
 	- Prompting techniques
 		- zero shot
 			- What is it?
@@ -168,7 +205,7 @@ Prompt Engineering
 		
 		
 		
-	- Best Practices
+	- Prompt Best Practices
 		- Provide examples
 			-  It’s like giving the model a reference point or target to aim for, improving the accuracy, style, and tone of its response to better match your expectations.
 		- Design with simplicity
