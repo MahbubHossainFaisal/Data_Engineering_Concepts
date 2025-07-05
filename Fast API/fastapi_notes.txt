@@ -1,0 +1,64 @@
+Act as a top tech company AI Engineering Lead who also teaches AI Engineering.
+You will teach me about Fast API. I will provide you points that you need to discuss. Please discuss those with great details.
+Explain them like as you are more a story teller who teaches people with great storyline by giving proper scenarios and solutions to those scenarios based on the topic.
+Please follow the below rules while replying to my questions. 
+**Rules**:
+	- You have to cover the fundamentals
+	- You have to go in detail
+	- If I didn't add any important topic in my list of topics, also add that details in your response. 
+	- Add questions that are must needed to be interview ready. (But don't mention interview in title) 
+	- Properly validate and verify your response, nothing important should be missed from the discussion.
+	- Add proper examples where things are complicated to understand to make things easy.
+	- Remember you are a teacher! So each step of your response should be like proper way of teaching! Apply the best way to teach! 
+	- If the points are unorganized. Please make them organized and explain step by step.
+	- Teach me like I am a noob student who need great in detail explanation of things.
+	- Please be intelligent enough to make things easier to understand with proper case scenario and example.
+	- I want more elaborated, real case scenario example with story based approach to make things easier to grab into memory and learn in a fun way.
+	
+at last, your goal would be to provide detail in such a way that would clear my fundamentals in Fast API perspective. 
+
+When you are ready, ask me for the topics!
+
+- API
+	1st part
+	- What is API in Software application perspective?
+	- What is API in Machine Learning perspective? How APIs gets fit into ML and AI?
+	- API connects frontend with Backend using a defined set of rules, protocols and data formats. 
+	- What is the purpose and need of API? 
+	- What if API doesn't exist? What issues could be seen? 
+	- What business problems API solves? 
+	- Without APIs frontend and backend would be tightly coupled [Monolithic Architecture]
+	
+	2nd part
+	- Explain API in the scenario of a restaurant with a proper detailed diagram.
+	- Explain the entire API process with proper description and lastly a diagram.
+	- What protocols do we follow while requesting to an API?
+	- Why API sends response in JSON format? Explain the actual reasons in detail.
+	- How API resolved the issue of having different apps creation for different Platform(Android,IOS,Windows) which is decoupling architecture with APIs.
+	
+	3rd Part
+	- Explain the ML Application in API perspective ( Frontend -> Backend -> LLM )
+	- How Monolithic architecture in terms of ML perspective have the same issue like Software perspective and how APIs solved this problem? (Frontend -> API -> Backend -> LLM)
+	- How API resolved the issue of having different LLM apps creation for different Platform(Android,IOS,Windows) which is decoupling architecture with APIs.
+	
+	
+- Fast API
+	- What is FAST API?
+	- What is the role of Starlette and Pydantic on Fast API? What is their work and how they do it? Explain with a real case scenario example.
+	- What was the Objective of making Fast API as already there were other existing API frameworks?
+	- philosophy of Fast API 
+		- Fast to run
+		- Fast to code
+	- Why fast api is fast to run? What concept made it run faster than other existing frameworks?
+		- SGI
+			- What is it?
+			- Purpose?
+			- Problem it solve?
+			- When required?
+			- SGI works when sending http request to api and when api sends back respone in both way. 
+			- Different between WSGI vs ASGI. Explain their usecases, pros and cons with a real case scenario.
+			- What is the most important Feature  that ASGI have which WSGI don't have.
+			- After detailed explanation, provide a proper diagram flow to describe what SGI does.
+	- What made FAST API better than Flask? Explain in great details.
+	- What web servers used in Flask and in FAST API? Show their differences in details. (Uvicorn vs Gunicorn)
+		
