@@ -42,7 +42,7 @@ When you are ready, ask me for the topics!
 	- How API resolved the issue of having different LLM apps creation for different Platform(Android,IOS,Windows) which is decoupling architecture with APIs.
 	
 	
-- Fast API
+- Fast API part 01
 	- What is FAST API?
 	- What is the role of Starlette and Pydantic on Fast API? What is their work and how they do it? Explain with a real case scenario example.
 	- What was the Objective of making Fast API as already there were other existing API frameworks?
@@ -62,3 +62,35 @@ When you are ready, ask me for the topics!
 	- What made FAST API better than Flask? Explain in great details.
 	- What web servers used in Flask and in FAST API? Show their differences in details. (Uvicorn vs Gunicorn)
 		
+- HTTP methods in FAST API
+	- Software based on user interaction
+		- Static (for example, a calender app/ a clock app)
+		- Dynamic (for example, Microsoft Excel)
+		
+	- How many types of interaction with a dynamic software
+		- CRUD
+			- CREATE
+			- Retrieve 
+			- Update
+			- Delete
+			
+	- Explain about server and client as per website concept
+	- HTTP is the protocol to communicate between client and serve and viseversa 
+	- HTTP Methods.
+		- GET request
+		- POST request
+		- PUT request
+		- DELETE request
+	
+
+- Path and Query Params:
+	 - What is path parameter
+		- Purpose
+		- What it does
+		- How it does
+		- Show a real case scenario where it is used.
+		- What path() function in FAST API can do? Explain all the scenarios in detail.
+		
+	- HTTP status codes
+		- Explain all the important HTTP status code in details with proper example like what they mean, when they occur and such like that.
+		- 
