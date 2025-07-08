@@ -89,8 +89,18 @@ When you are ready, ask me for the topics!
 		- What it does
 		- How it does
 		- Show a real case scenario where it is used.
-		- What path() function in FAST API can do? Explain all the scenarios in detail.
+		- What path() function of path parameter can do? Explain all the scenarios in detail.
 		
 	- HTTP status codes
 		- Explain all the important HTTP status code in details with proper example like what they mean, when they occur and such like that.
-		- 
+	- HTTP_Exception
+		- Explain about it in details and real case scenario where we would need to use it.
+		
+	- Query Parameter:
+		- What is it?
+		- What is the purpose of it?
+		- When is it needed?
+		- What operations we can perform through this?
+		- What query() utility function in fast API can do? Explain with a proper real scenario.
+		- Difference between path() vs query() functions.
+		
