@@ -1,0 +1,44 @@
+
+**Step Back Prompting*?**
+
+We all are familiar with basic prompt techniques like zero-shot and few-shot prompting! But here's a powerful next step to level up your prompt engineering game.
+
+**🧠 What is Step Back Prompting?**
+It’s a technique where you ask the LLM to **reflect first**—before giving an answer.
+This helps guide the model's thinking to match **your desired tone, structure, and logic.**
+
+Let's dive into an interesting example below.
+
+**🎬 Example Scenario: Writing a storyline for Iron Man 4 in the current Marvel Cinematic Universe**
+
+🔸 **Regular Prompt:**
+*"Write a storyline for Iron Man 4 in the Marvel Cinematic Universe."*
+
+❗ Common issues with LLM:
+
+* Might mix comic canon with MCU
+* May Ignore character development arcs
+* Hallucinates plots/events
+* Breaks tone and pacing
+* Add villains who might not relate to current scenario of MCU.
+
+Here is how step back prompting help us to resolve the issues.
+
+**✅ Step Back Prompt Version:**
+
+"Write a storyline for Iron Man 4 in the MCU. But before that, reflect on the following:
+
+1. Must continue from the existing MCU canon
+2. Honor Tony Stark’s development arc and emotional legacy
+3. Include a **plausible** way to bring him back
+4. Make the tone **stronger and more intense** than past Iron Man films
+5. Villain must be the **strongest** among all Iron Man movies
+6. Include scenes that highlight Tony’s **intellect and innovation**
+
+Then propose the storyline based on these reflections"
+
+**🎯 Why It Works:**
+This method makes the LLM “think before speaking” — just like a human would in real-life brainstorming.
+
+
+#PromptEngineering #LLM #StepBackPrompting 

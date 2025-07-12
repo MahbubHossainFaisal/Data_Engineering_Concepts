@@ -104,3 +104,68 @@ When you are ready, ask me for the topics!
 		- What query() utility function in fast API can do? Explain with a proper real scenario.
 		- Difference between path() vs query() functions.
 		
+	- Pydantic
+		- What is it?
+		- What is the purpose of it?
+		- What operations we can perform through this?
+		- When is it needed?
+		- What 2 main problems pydantic solves?
+			- Type validation
+			- Data Validation
+		- Build a pydantic model example like below:
+			- Create a class patient inherits basemodel
+				- Define a schema under there -> name str, age str
+				- Create an object of the pydantic class and pass a dictionary to that class through this object
+				- create a function to use that class.
+				
+	- Pydantic part 02
+		- Every field you define under pydantic class, are by default required.
+		- We can make a field optional also by using type Optional.
+		- We can use some shortcut data validator like
+			- EmailStr
+			- AnyURL
+		- Explain "Field" from pydantic
+			- Cover all the important parameters and aspects where "Field" would be useful to use.
+			- How to attach metadata in "Field"
+			- Explain about "Strict" parameter under field. What is the purpose of it?
+		- Field validator	
+			- What is it?
+			- What is the purpose of it?
+			- What operations we can perform through this?
+			- Show different example real case scenarios where we can use field_validator! E.g, For custom validation or data transformation.
+			- There are two modes in field validator which is related to type coercion
+				- Before mode
+				- After mode (by default)
+		
+		- Model validator	
+			- What is it?
+			- What is the purpose of it?
+			- What operations we can perform through this?
+			- What problem model validator solves which Field_Validator can't solve?
+			- There are also modes in model validator. Explain in details about their usecase.
+			- Show different example real case scenarios where we can use Model_validator! E.g, For custom validation or data transformation.
+			
+		- Computed Field
+			- What is it?
+			- What is the purpose of it?
+			- What operations we can perform through this?
+			- Show different example real case scenarios where we can use Model_validator! E.g, For custom validation or data transformation.
+			
+		- Nested Models
+			- What is it?
+			- What is the purpose of it?
+			- What operations we can perform through this?
+			- Show different example real case scenarios where we can use Model_validator! E.g, For custom validation or data transformation.
+			- Benefits of nested models
+				- Better organized
+				- Reusability
+				- Readability
+				- Validation
+				
+		- Exporting Pydantic models
+			- Show the various ways using which we can export pydantic models.
+				-  model_dump()
+				- model_dump_json()
+				- Also discuss different important mostly used parameters under dump() or dump_json()
+				- Explain exclude_unset() under model_dump()
+				

@@ -285,4 +285,15 @@ S			- oftmax + Sampling: Converts scaled logits to probabilities and samples the
 			- even across identical prompts to the same model, small differences in output sentence formatting and word choice can occur. 
 			- As a prompt engineer you should rely on automated tests and evaluation procedures to understand how well your prompt generalizes to a task.
 			- Prompt engineering is an iterative process. Craft and test different prompts, analyze, and document the results. Refine your prompt based on the model’s performance. Keep 
-			experimenting until you achieve the desired output. When you change a model or model configuration, go back and keep experimenting with the previously used prompts.
+			experimenting until you achieve the desired output. When you change a model or model configuration, go back and keep experimenting with the previously used prompts
+			
+			
+			
+- Best practices for prompt engineering with the OpenAI API
+	- Put instructions at the beginning of the prompt and use ### or """ to separate the instruction and context 
+	- Be specific, descriptive and as detailed as possible about the desired context, outcome, length, format, style, etc 
+	- Articulate the desired output format through examples
+	- Start with zero-shot, then few-shot, neither of them worked, then fine-tune
+	- Reduce “fluffy” and imprecise descriptions
+	- Instead of just saying what not to do, say what to do instead
+	- Code Generation Specific - Use “leading words” to nudge the model toward a particular pattern
