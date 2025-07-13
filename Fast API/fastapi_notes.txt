@@ -168,4 +168,35 @@ When you are ready, ask me for the topics!
 				- model_dump_json()
 				- Also discuss different important mostly used parameters under dump() or dump_json()
 				- Explain exclude_unset() under model_dump()
-				
+	
+	
+	POST Request:
+		- What is it?
+		- What is the purpose of it?
+		- What operations we can perform through this?
+		- Explain request body in details with a proper example.
+		- Three steps in post request.
+			- Getting the request body
+			- Validate that with pydantic
+			- Add that properly validated data request to database.
+			- Provide a proper example case scenario( A patient info ) with Code regarding POST request 
+			(E.g. A real patient request body properly validated with Pydantic, computed fields (e.g. BMI) and ready to insert in database) 
+		- What is Literal Type in python? Explain.
+		- What is the purpose of Annotated in FIELDS?
+		- What is the purpose of JSONResponse()
+		
+		
+		
+	- PUT	
+		- What is it?
+		- What is the purpose of it?
+		- What operations we can perform through this?
+		- Provide a proper example case scenario( A patient info ) with Code regarding PUT request
+			(e.g patient id and request body properly validated with Pydantic to update in the database)
+		- Provide an example scenario with code, when we have to update certain values for which the calculated field values also will get recomputed.
+	- DELETE 
+		- What is it?
+		- What is the purpose of it?
+		- What operations we can perform through this?
+		- Provide a proper example case scenario( A patient info ) with Code regarding DELETE request
+			(e.g patient id and request body properly to delete in the database)
