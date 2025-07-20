@@ -4,7 +4,7 @@ __pycache__/
 *$py.class
 
 # Virtual Environment
-venv/
+fastapi/
 .env/
 .venv/
 
