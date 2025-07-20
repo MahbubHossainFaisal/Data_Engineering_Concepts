@@ -1,0 +1,84 @@
+{
+  "patients": [
+    {
+      "patient_id": "P1001",
+      "first_name": "John",
+      "last_name": "Smith",
+      "date_of_birth": "1985-03-22",
+      "gender": "male",
+      "phone": "+1 555-0101",
+      "email": "john.smith@example.com",
+      "address": {
+        "street": "123 Oak Street",
+        "city": "Springfield",
+        "state": "IL",
+        "zip": "62704"
+      },
+      "blood_type": "A+"
+    },
+    {
+      "patient_id": "P1002",
+      "first_name": "Emily",
+      "last_name": "Johnson",
+      "date_of_birth": "1992-07-15",
+      "gender": "female",
+      "phone": "+1 555-0102",
+      "email": "emily.j@example.com",
+      "address": {
+        "street": "456 Maple Ave",
+        "city": "Riverside",
+        "state": "CA",
+        "zip": "92507"
+      },
+      "blood_type": "O-"
+    },
+    {
+      "patient_id": "P1003",
+      "first_name": "Michael",
+      "last_name": "Williams",
+      "date_of_birth": "1978-11-30",
+      "gender": "male",
+      "phone": "+1 555-0103",
+      "email": "m.williams@example.com",
+      "address": {
+        "street": "789 Pine Road",
+        "city": "Madison",
+        "state": "WI",
+        "zip": "53703"
+      },
+      "blood_type": "B+"
+    },
+    {
+      "patient_id": "P1004",
+      "first_name": "Sarah",
+      "last_name": "Brown",
+      "date_of_birth": "1989-05-18",
+      "gender": "female",
+      "phone": "+1 555-0104",
+      "email": "sarah.b@example.com",
+      "address": {
+        "street": "101 Elm Lane",
+        "city": "Austin",
+        "state": "TX",
+        "zip": "78701"
+      },
+      "blood_type": "AB+"
+    },
+    {
+      "patient_id": "P1005",
+      "first_name": "David",
+      "last_name": "Miller",
+      "date_of_birth": "1975-09-05",
+      "gender": "male",
+      "phone": "+1 555-0105",
+      "email": "d.miller@example.com",
+      "address": {
+        "street": "202 Birch Blvd",
+        "city": "Denver",
+        "state": "CO",
+        "zip": "80202"
+      },
+      "blood_type": "A-"
+    }
+  ]
+}
