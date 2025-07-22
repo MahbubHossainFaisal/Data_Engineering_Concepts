@@ -1,8 +1,11 @@
 from fastapi import FastAPI, Path, Query, HTTPException
 from typing import Dict, List
+from create_patient import Patient_info
 import json
 app = FastAPI()
 
+# Json file path
+json_file_path = 'patients_info.json'
 
 # load patient data
 with open('patients_info.json','r') as f:
@@ -36,3 +39,23 @@ def search_patient(
         raise HTTPException(status_code=404, detail="Patient not found")
         
     return filtered_patients
+
+@app.post('/create_patient')
+async def create_patient(patient_info: Patient_info):
+    try:
+        with open(json_file_path, 'r+') as f:
+            patients_data = json.load(f)
+    except FileNotFoundError:
+        patients_data = {'patients': []}
+
+    for patient in patients_data['patients']:
+        if patient['patient_id'] == patient_info.patient_id:
+            raise HTTPException(status_code=400, detail="Patient ID already exists")
+
+    new_patient = patient_info.model_dump()
+    patients_data['patients'].append(new_patient)
+
+    with open(json_file_path, 'w') as f:
+        json.dump(patients_data, f, indent=4)
+
+    return {"message": "Patient created successfully", "patient_id": patient_info.patient_id}

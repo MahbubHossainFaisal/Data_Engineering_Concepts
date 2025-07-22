@@ -21,7 +21,7 @@ class Patient_info(BaseModel):
     first_name: str = Field(..., min_length=2, max_length=50)
     last_name: str = Field(..., min_length=2, max_length=50)
     date_of_birth: str
-    gender: str = Field(..., regex=r'^(male|female|other)$')
+    gender: str = Field(..., pattern=r'^(male|female|other)$')
     phone: str
     email: EmailStr
     address: Address
