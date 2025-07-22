@@ -1,0 +1,81 @@
+🧠 **How to Write a Tree of Thought (ToT) Prompt**
+
+I already discussed in my previous post about what ToT prompting is — a way to guide reasoning through multiple possibilities before arriving at the best answer.
+But how do you actually **write** one?
+
+Let’s break it down with an interesting and exciting problem👇
+
+🦇 ToT in Action — Batman’s AI Assistant
+
+To solve a life-threatening riddle from the Riddler, Batman turns to his AI assistant and feeds it this prompt:
+
+**Prompt**:
+You are a multi-strategy reasoning engine. Solve the following problem using the Tree of Thought approach:
+
+- Generate multiple possible thoughts (ideas, partial answers, or strategies) 
+- For each, explain the reasoning behind why it might work 
+- Score each thought based on criteria such as clarity, logic fit, accuracy, or symbolism 
+- Select the best path and present the final answer, grounded in the reasoning process
+
+**Problem:**
+*"I speak without a mouth, and hear without ears. I have no body, but I come alive with the wind. What am I?"*
+
+Here how Batman's AI assistant might reply:
+
+✅ Step 1: Generate Thoughts
+
+* **Thought A**: Echo
+* **Thought B**: Shadow
+* **Thought C**: Wind Instrument
+* **Thought D**: Ghost
+* **Thought E**: Whisper
+
+🧠 Step 2: Reason Through Each
+
+**Echo**
+✔ Speaks without a mouth
+✔ Hears without ears
+✔ Has no body
+✔ Comes alive with reflected sound (poetically linked to wind)
+→ Strong literal and metaphorical match
+
+**Shadow**
+✔ No body
+✘ Doesn’t speak or hear
+✘ Moves with light, not wind
+
+**Wind Instrument**
+✔ Makes sound
+✔ Needs wind
+✘ Has a physical body
+✘ Doesn’t hear
+
+**Ghost**
+✔ Fits metaphorically
+➖ Vague and less precise
+
+**Whisper**
+✔ Can be carried by wind
+✘ Requires a mouth to exist
+✘ Doesn’t fully meet all conditions
+
+
+🧾 Step 3: Scoring
+
+| Thought     | Clarity | Fit to Riddle | Symbolism | Accuracy | Total |
+| --------------- | ------- | ------------- | --------- | -------- | ------ |
+| **Echo**    | 10   | 10      | 9     | 10    | **39** |
+| Shadow     | 6    | 5       | 8     | 5    | 24   |
+| Wind Instrument | 7    | 6       | 7     | 6    | 26   |
+| Ghost      | 8    | 7       | 10    | 5    | 30   |
+| Whisper     | 7    | 6       | 7     | 6    | 26   |
+
+🎯 Step 4: Final Answer
+
+**Final Thought Chosen**: **Echo**
+
+✅ The Batcomputer beeps
+✅ The screen flashes green
+✅ Hostage location unlocked
+
+**Batman wins — again.**
