@@ -44,3 +44,9 @@ class Patient_info(BaseModel):
         if not phone_pattern.match(v):
             raise ValueError('Invalid phone number format')
         return v
+    
+    @field_validator('gender')
+    def validate_gender(cls, v):
+        return v.lower()
+    
+

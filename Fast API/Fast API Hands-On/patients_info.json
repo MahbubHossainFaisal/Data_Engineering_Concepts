@@ -79,21 +79,6 @@
                 "zip": "80202"
             },
             "blood_type": "A-"
-        },
-        {
-            "patient_id": "P9001",
-            "first_name": "Mahbub",
-            "last_name": "Hossain",
-            "date_of_birth": "1998-07-12",
-            "gender": "male",
-            "phone": "01966282432",
-            "email": "faisal@example.com",
-            "address": {
-                "street": "gopta",
-                "city": "Nganj",
-                "state": "DHAKA",
-                "zip": "z84523"
-            }
         }
     ]
 }
