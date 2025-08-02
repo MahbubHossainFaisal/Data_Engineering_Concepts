@@ -24,4 +24,15 @@
         - What Result cache store? with example
         - How Result cache is reducing customer's processing cost?
 
+- Lessions learned from the Architecture and Caching sections
+    - You need a VWH to execute queries
+    - Always use limit clause with select * from queries to optimize cost.
+    - For cost reduction during development activity, we can keep virtual warehouses running/active for longer at least for 15 mins.
+    time. Because, if it got suspended all the caching of micro partitioned data present
+    in the VWH would be gone. And for a new query, even though it is same like a previous 
+    query, data will be fetched from storage layer again which be costlier.
+    - Share the VWH when group of users are working on the common tables.
+    - Never disable cloud service layer cache 
+
+
 

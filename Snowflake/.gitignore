@@ -1,0 +1,20 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual Environment
+fastapi/
+.env/
+.venv/
+
+# IDE & Editor
+.vscode/
+.idea/
+
+# OS & Temp files
+.DS_Store
+Thumbs.db
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
