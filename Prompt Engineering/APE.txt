@@ -1,0 +1,150 @@
+I will write a continued post regarding "Automatic Prompt Engineering technique" post on linkedin to make people aware about it. I have created some point which
+need to be discussed.
+
+Before reading it, you must reflect on the following:
+
+1. It has to be a simple linkedin post with plain text and bullet points (You can just highlight headers).
+2. It has to be concise and explicit.
+3. In the input, you can refine in the best way possible.
+4. What I have provided, you have to make it well structured , organized and better understandable. So I want you to bring your best creativity there.
+5. My points maybe insufficient for proper context. so please judge and add other valuable points also which must need to be there.
+6. At last, Don't make it huge, instead Normal , easy to read and attractive tone.
+7. Create the post in such a way that it must gather the attraction of audience.
+
+
+Now read my input and act based on the above factors.
+
+
+<input>
+Automatic Prompt Engineering (APE) is the process of using LLMs to automatically generate, test, evaluate, and refine prompts
+with the goal of discovering the most effective prompts for a specific task.
+
+
+Core Concept:
+Generate prompt candidates
+Try them
+Score them
+Pick/refine the best
+Repeat the process
+
+
+When it is useful:
+	- You're unsure of the best prompt style
+	- You want to optimize for accuracy, creativity, or speed
+	- You're scaling GenAI apps that must auto-improve
+	
+What Problem Does APE Solve?
+	- Manually writing and testing prompts is slow. This technique Automate this process
+	- Human-written prompts may not explore full variety. This technique can generate diverse variants and choose the best one.
+	- No way to choose best prompt automatically. Using this technique, We can Add automatic scoring via metrics or evals
+
+Prompt Template for APE Workflows
+txt
+You are a great prompt generator and evaluator.
+
+Task: [Insert use case]
+1. Generate [N] diverse prompt variants for this task
+2. Run each prompt on the sample inputs
+3. Compare outputs to reference answers
+4. Score using exact match, BLEU or ROUGE
+5. Select top [K] prompts and return them
+
+
+What does Scoring technique BLEU or ROUGE do?
+	- [Explanation of BLEU with proper example]
+	- [Explanation of ROUGE with proper example]
+</input>
+
+
+Actual Post:
+
+
+Here’s your finalized prompt with professional formatting — replacing excessive `**bold**` styling with clean bullet points, emojis, and section markers for clarity, **without altering any content**:
+
+---
+
+🔧 **Automatic Prompt Engineering (APE): Let AI Find Better Prompts for You**
+
+A powerful technique where LLMs generate, test, score, and refine prompts on their own to find the most effective one for a task.
+
+---
+
+🚀 **Core Workflow**
+
+* 🔹 Generate diverse prompt candidates
+* 🔹 Test them on sample inputs
+* 🔹 Score the outputs
+* 🔹 Select or refine the best-performing ones
+* 🔁 Repeat until optimal
+
+---
+
+🎯 **When to Use APE**
+
+* When you're unsure about the ideal prompt format
+* When you want to optimize for accuracy, speed, or creativity
+* When you're scaling a GenAI app and need self-improving prompts
+
+---
+
+❗ **Problems APE Solves**
+
+* Manually writing and testing prompts is slow → Automate this process
+* Human-written prompts may not explore full variety → APE generates diverse variants and selects the best
+* No way to choose best prompt automatically → Add automatic scoring via metrics or evals
+
+---
+
+🧠 **APE Prompt Template**
+
+```
+You are a great prompt generator and evaluator.
+
+Task: [Insert your use case]
+
+1. Generate [N] diverse prompts  
+2. Run each on sample inputs  
+3. Compare outputs with references  
+4. Score with BLEU / ROUGE  
+5. Return top [K] performing prompts
+
+Finally, you can take the sample output prompts and check which works the best!
+```
+
+---
+
+📏 **What Are BLEU and ROUGE?**
+
+🔹 **BLEU (Bilingual Evaluation Understudy)**
+→ Thinks like a strict grader:
+
+* Checks how many words or sequences in your output exactly match the reference
+* Best for machine translation and tasks requiring exact matching
+
+**Example:**
+
+* Reference: *"The cat sat on the mat"*
+* Output: *"The cat is on the mat"*
+* ✅ Many words and short phrases match → **High BLEU score**
+
+🔹 **ROUGE (Recall-Oriented Understudy for Gisting Evaluation)**
+→ Thinks like a summary checker:
+
+* Looks at how much of the important content from the reference appears in the output — even with different wording
+* Best for summarization tasks
+
+**Example:**
+
+* Reference: *"The cat climbed the tree to escape the barking dog."*
+* Output: *"To avoid the dog, the cat went up the tree."*
+* ✅ Main idea and key phrases are preserved → **High ROUGE score**
+
+---
+
+✨ **APE is like having a prompt scientist inside your AI pipeline — always testing, always optimizing.**
+
+---
+
+\#LLM #PromptEngineering #APE
+
+Let me know if you'd like a visual or PDF export for sharing on socials.
