@@ -1,0 +1,11 @@
+Features Snowflake console comes with
+    - Write query with version control enabled
+    - Create folders and organize your worksheets
+    - Capability to share worksheets
+    - Visualize data
+    - Profile data
+    - Add dynamic filter to query
+    - Interface to visualize roles hierarchy
+    - Billing information, users information
+    - Browse through query history, warehouse usage and resource monitors
+    - Integrate well with Snowflake merketplace data.
