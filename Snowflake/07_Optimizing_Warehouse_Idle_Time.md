@@ -1,9 +1,3 @@
-Snowsight
-    - What is it?
-    - What is the purpose of it?
-    - What problem it solves?
-    - In which scenarios it helps?
-
 A scenario -
     - A data analyst has been assigned with a warehouse in snowflake
     - His task is to do query using that warehouse and do data analysis
