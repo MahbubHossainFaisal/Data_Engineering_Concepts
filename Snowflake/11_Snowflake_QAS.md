@@ -1,0 +1,21 @@
+- Query Acceleration Service
+    - What is Query Acceleration service?
+    - What is the purpose of it?
+    - What problem it solves
+    - What advantage it brings to snowflake?
+    - Provide an actual scenario where QAS is needed to feel the problem realistically and explain
+    how QAS would solve it.
+
+- Creating warehouse with QAS
+    - It is like an option that can be found when creating a warehouse.
+    - A way to overcome the problem of queueing of queries
+        - Adding multicluster
+    - Explain what is horizontal scaling of clusters (Multi-cluster mode on)
+        - Purpose
+        - Benefits
+        - Problems
+    - Explain what is vertical scaling of clusters
+        - Is it possible? If so, in which way? If not, why?
+        - Purpose
+        - Benefits
+        - Problems
