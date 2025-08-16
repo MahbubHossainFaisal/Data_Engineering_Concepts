@@ -19,3 +19,16 @@
         - Purpose
         - Benefits
         - Problems
+
+- QAS scale factor?
+    - What is it?
+    - What is the purpose of it and what problem it resolve?
+    - How it works?
+    - What advantage it brings up?
+    - Provide an actual scenario where QAS scale factor is needed to feel the problem realistically.
+
+- Queries that are eligible for QAS
+    - What are the main criterias of a query being eligible to have QAS. Explain with great detail
+    - How can we check that eligibility using Snowflake (like checking the possible query completion time and what we are getting currently using estimate query acceleration function and query_acceleration_eligible.)
+    - Only the fetch and filtering operations are executed on QAS.
+- 
