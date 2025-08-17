@@ -12,3 +12,8 @@
     - Could we able to use clustering instead of Search optimization service? If clustering can solve the problem
     then why we need Search Optimization service? If clustering won't be able to solve the issue, why is that?
     What would make us use Search Optimization instead of clustering
+
+- SOS creates extra storage which is seperate than actual table to provide it's service. Explain in details.
+
+
+- What specifically we should look into a column in order to make it eligible to put it under SOS.
