@@ -1,0 +1,43 @@
+- Staging area and DWH staging area are not same
+- Staging area in snowflake is a blob storage area where you load all your raw files before loading them into Snowflake database.
+    - Blob storages can be
+        - External
+            - S3
+            - Azure blob storage
+            - GCS
+        - Internal
+            - Snowflake internal staging area (also a blob storage managed by Snowflake)
+
+- External Staging
+    - Stage object connection with External storages (Not Secure)
+    - Integration object connection with External Storages (Secure)
+
+- Internal Staging
+    - Integration object is not required here as we  will be using staging area managed by snowflake
+    - Connection object will remain secure.
+
+- File Format
+    - What is it?
+    - What is the purpose of it?
+    - What are most important parameter of it? 
+
+- Internal Staging Area types
+    - User Stage
+        - Represented by @~
+        - Each user has a Snowflake stage allocated to them by default for storing files. This stage is a convenient option if your files will only be accessed by a single user but need to be copied into multiple tables.
+        - Constraints
+            - Multiple users require access to the files
+            - The current user does not have INSERT privileges on the tables the data will be loaded into.
+    - Table Stage
+        - Represented by @%
+        - Each table has a snowflake stage allocated to it by default for storing files.This stage is a convenient option if your files need to be accessible to multiple users and only need to be copied into a single table.
+        - Constraints
+            - Multiple users require access to the files.
+            - Unlike named stages, table stages cannot be altered or dropped.
+            - Table stages do not support setting file format options. instead, you must specify file format and copy options as part of the copy into <table> command.
+            - Table stages do not support transforming data while loading it. (E.g. using a query as the source for the copy command.)
+    - Named Stage
+        - Represented by @
+        - Internal stages are named database objects that provide the greatest degree of flexibility for data loading. Because they are database objects, the security/access rules that apply to all objects apply
+        - Users with the appropriate priviledges on the stage can load data into any table.
+        - Ownership of the stage can be transferred to another role, and privileges granted to use the stage can be modified to add or remove roles.

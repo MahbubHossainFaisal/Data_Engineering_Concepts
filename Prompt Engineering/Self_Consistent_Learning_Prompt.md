@@ -1,12 +1,4 @@
-I will write a post regarding "Self Consistent Learning Prompt" post on linkedin to make people aware about it. I have created some point which need to be discussed. Before reading those points, you must reflect on the following rules: 
-1. It has to be a simple linkedin post with plain text and bullet points (You can just highlight headers but ignore any "*" sign. Use only bullet points or hiphen).
-2. It has to be concise and explicit. 
-3. My input points, You can refine in the best way possible and then provide your response based on the refined points. 
-4. What input I have provided, you have to make it well structured , organized and better understandable while providing response. So I want you to bring your best creativity there. 
-5. My points maybe insufficient for proper context. so please judge and add other valuable points also which must need to be there for a better response or explanation. 
-6. At last, Don't make it huge, instead Normal , easy to read and attractive tone. 
-7. Create the post in such a way that it must gather the attraction of audience. 8. In the input, I have provided a lot of steps. Convert them into 5 steps of chaining prompt but make sure you don't skip any important context. 
-9. At last do necessary changes/modifications to make it look attractive which audience find very interesting to read. 
+
 <input>
 - The concept
 - How it is similar to COT
