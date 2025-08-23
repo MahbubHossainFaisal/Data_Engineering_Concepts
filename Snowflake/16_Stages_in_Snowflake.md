@@ -41,3 +41,5 @@
         - Internal stages are named database objects that provide the greatest degree of flexibility for data loading. Because they are database objects, the security/access rules that apply to all objects apply
         - Users with the appropriate priviledges on the stage can load data into any table.
         - Ownership of the stage can be transferred to another role, and privileges granted to use the stage can be modified to add or remove roles.
+
+
