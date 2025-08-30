@@ -41,3 +41,36 @@
     - on_error = 'CONTINUE'. Explain this.
     - How to capture error data in a seperate staging files?
     - How to handle the data, Suppose I want to continue my loading from S3 also but also want to find the errors and fix them to reinsert again. What is the easiest process?
+
+
+- Unload data from Snowflake to S3
+    - How to unload files from snowflake to S3 (Whole query step by step)
+    - What things need to be checked in order to understand that everything unloaded to S3 are exact same and we are not missing anything! How to validate and verify?
+
+- AWS CLI basics
+    - How to create AWS CLI configuration?
+        - Include also how to create access and secret keys of AWS.
+        
+    - Checking list of files in a s3 bucekt
+    - How to copy files from s3 to my local folder?
+    - How to upload files from local to S3 bucket
+
+
+    - Discuss some most important 25 other command names and their short description on AWS CLI
+
+
+    - When it is important to use CLI instead of console through web browser?
+    - 
+
+- There are two ways of copying in Snowflake
+    - Through staging (explain with query example)
+    - Direct copy (Explain with query example)
+    - Direct Unload (Explain with query example)
+    - What is the benefit and disadvantages of Direct copy/unload? Explain in details
+    - Is zip compression format copyable in Snowflake?
+    - How to copy zip files from s3 to snowflake? Show details with example query
+        - What would happen if we want to copy a zip file that has more files under it?
+        - What would happen if we want to copy a zip file that has only one file under it? 
+        - What we can do in order to solve this problem?
+
+
