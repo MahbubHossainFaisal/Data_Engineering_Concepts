@@ -50,7 +50,6 @@
 - AWS CLI basics
     - How to create AWS CLI configuration?
         - Include also how to create access and secret keys of AWS.
-        
     - Checking list of files in a s3 bucekt
     - How to copy files from s3 to my local folder?
     - How to upload files from local to S3 bucket
