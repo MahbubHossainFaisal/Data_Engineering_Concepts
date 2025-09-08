@@ -58,3 +58,6 @@
                 - Explain  step by step
 
 
+
+select * from cte3 where improvement_score <>0
+ORDER BY improvement_score DESC, name ;
