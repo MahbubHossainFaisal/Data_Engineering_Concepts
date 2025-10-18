@@ -1,0 +1,27 @@
+- Database normalization
+    - When you normalize a database table, you structure it in such a way 
+    - Normalized table are protected from
+        - Insertion anomalies
+        - Deletion anomalies
+        - Updation anomalies
+    - There a sets of criteria we can set to get the danger of data
+        - First normal form (Minimum safety garranty)
+            - There is no such thing as row order in relational database table.
+            - Using row order to convey information violates 1NF.
+                - Suppose we order the name of some person names based on height. That violates 1NF.
+                - But if we add another column rank/ actual height metioned and make a relation with the person names based on their height that's ok.
+                - Mixing datatypes within a column is also a violation of 1NF.
+                - A table without a primary key is also a violation of 1NF
+                - Storing a repeating group of data items on a single row violates 1NF.
+                - Explain the solutions of these problems for 1NF.
+        - Second normal form (Better safety garranty than first normal form)
+            - Deletion anomaly
+            - Update anomaly
+            - Insertion anomaly
+            - 2NF means in a table how  non primary columns (attributes) holds a relationship with the primary key.
+            - In 2NF, each non key attributes must depend on the primary key.
+        - Third normal form.
+        - Forth normal form.
+        - Fifth normal form.
+        - Every level is stricter asssesment.
+        
