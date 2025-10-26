@@ -18,3 +18,6 @@
         - Explain the LATERAL FLATTEN(to_array (....)) function with proper case scenario to understand what it does.
         - How above can be input of another LATERAL FLATTEN(to_array(....))
 
+
+
+

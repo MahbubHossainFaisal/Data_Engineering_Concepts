@@ -3,7 +3,6 @@
     - What is table retention period? Explain
         - How to check my table's retention period?
         - We can set the retention period to 0 days also. In that case we won't be able to get a previous table version after updating/deleting.
-        
     - Can I undrop a table/schema/database? Explain
     - If you use CREATE/REPLACE table then you can't time travel. Explain
     - How to see a table that I had before update 5 minutes back?

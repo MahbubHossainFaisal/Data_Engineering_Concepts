@@ -1,0 +1,42 @@
+- Database normalization
+    - When you normalize a database table, you structure it in such a way 
+    - Normalized table are protected from
+        - Insertion anomalies
+        - Deletion anomalies
+        - Updation anomalies
+    - There a sets of criteria we can set to get the danger of data
+        - First normal form (Minimum safety garranty)
+            - There is no such thing as row order in relational database table.
+            - Using row order to convey information violates 1NF.
+                - Suppose we order the name of some person names based on height. That violates 1NF.
+                - But if we add another column rank/ actual height metioned and make a relation with the person names based on their height that's ok.
+                - Mixing datatypes within a column is also a violation of 1NF.
+                - A table without a primary key is also a violation of 1NF
+                - Storing a repeating group of data items on a single row violates 1NF.
+                - Explain the solutions of these problems for 1NF.
+        - Second normal form (Better safety garranty than first normal form)
+            - Deletion anomaly
+            - Update anomaly
+            - Insertion anomaly
+            - 2NF means in a table how  non primary columns (attributes) holds a relationship with the primary key.
+            - In 2NF, each non key attributes must depend on the entire primary key.
+                - For example, Suppose we have player_id, item_type, item_quantity, player_rating in players table
+                and player_id and item_type combinedly is the primary key. Here, Item quantity depends on player_id and item_type
+                but player_rating doesn't depend on item_type. That's why it's breaking 2NF rule because it's not dependent to all the columns that makes a primary key in that table.
+                - How to fix this issue?
+                    - Hint. Separating to columns to make individual tables.
+
+        - Third normal form.
+            - It checks the relation between a non key attribute with another non key attribute and how they are dependent with the primary key 
+                - Suppose We have player_id, player_rating, skill level
+                - Skill levels are like this. If (1-3) level then player_rating is beginner, if (4-7) then amature, if(7-10) then pro.
+                - So here we can see player player_rating depends on skill level too.
+                - Both depends on Primary key but they are dependent on each other too which violates 3NF. Two no key attributes must not be dependent on each other.
+                - How to fix this?
+                    - Hint. Separate them in different tables.
+        - Forth normal form.
+            - {Explain in the same way like 1NF, 2NF and 3NF. But make sure the example/descriptions/points are correct and accurate.}
+        - Fifth normal form.
+            - {- {Explain in the same way like 1NF, 2NF, 3NF and 4NF. But make sure the example/descriptions/points are correct and accurate.}}
+        - Every level is stricter asssesment. For a table to comply a particular normal form it has to comply with all previous normal form.
+        
