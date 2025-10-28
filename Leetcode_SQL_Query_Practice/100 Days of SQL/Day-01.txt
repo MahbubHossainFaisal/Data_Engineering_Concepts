@@ -1,0 +1,28 @@
+-- Run this in onecompiler.
+
+
+create table icc_world_cup
+(
+Team_1 Varchar(20),
+Team_2 Varchar(20),
+Winner Varchar(20)
+);
+INSERT INTO icc_world_cup values('India','SL','India');
+INSERT INTO icc_world_cup values('SL','Aus','Aus');
+INSERT INTO icc_world_cup values('SA','Eng','Eng');
+INSERT INTO icc_world_cup values('Eng','NZ','NZ');
+INSERT INTO icc_world_cup values('Aus','India','India');
+
+select * from icc_world_cup;
+
+select * from icc_world_cup where team_1 = 'India';
+
+
+WITH cte AS (
+    SELECT team_1 AS team_name, CASE WHEN team_1 = WINNER THEN 1 ELSE 0 END as win_flag FROM icc_world_cup
+    UNION ALL
+    SELECT team_2 AS team_name, CASE WHEN team_2 = WINNER THEN 1 ELSE 0 END as win_flag FROM icc_world_cup
+)
+select team_name, count(team_name) as match_played, sum(win_flag) as total_wins, count(team_name) - sum(win_flag) as total_loss  from cte
+group by team_name;
+
