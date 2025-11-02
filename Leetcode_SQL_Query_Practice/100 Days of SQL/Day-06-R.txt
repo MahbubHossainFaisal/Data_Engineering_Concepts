@@ -1,0 +1,16 @@
+DO $$
+DECLARE
+  today_date DATE := DATE '2025-11-03';
+  n INT := 3;
+  result DATE;
+  i INT;
+BEGIN
+  result := today_date + 6 ;
+  RAISE NOTICE 'Final result: %', result;
+  FOR i in 1..(n-1) LOOP
+    result := result + 7;
+    RAISE NOTICE 'Final result: %', result;
+  END LOOP;
+    
+  
+END $$;
