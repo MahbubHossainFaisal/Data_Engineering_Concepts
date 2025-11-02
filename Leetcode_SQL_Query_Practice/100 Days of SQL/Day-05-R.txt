@@ -1,0 +1,37 @@
+create table entries ( 
+name varchar(20),
+address varchar(20),
+email varchar(20),
+floor int,
+resources varchar(10));
+
+insert into entries 
+values ('A','Bangalore','A@gmail.com',1,'CPU'),('A','Bangalore','A1@gmail.com',1,'CPU'),('A','Bangalore','A2@gmail.com',2,'DESKTOP')
+,('B','Bangalore','B@gmail.com',2,'DESKTOP'),('B','Bangalore','B1@gmail.com',2,'DESKTOP'),('B','Bangalore','B2@gmail.com',1,'MONITOR');
+
+select * from entries;
+
+
+with total_visits_and_resources
+as
+(
+select name,count(1) as total_visits, STRING_AGG(DISTINCT resources, ', ') as resources_used
+from entries
+group by name
+order by name
+)
+--select * from total_visits;
+,most_visited_floor
+as
+(
+select name,floor, count(1) as visit_count, ROW_NUMBER() OVER(partition by name ORDER BY count(1) DESC) as rnk 
+from entries
+group by name, floor
+)
+select tvr.name, tvr.total_visits,mvf.floor, tvr.resources_used
+from total_visits_and_resources tvr
+inner join 
+most_visited_floor mvf 
+on tvr.name = mvf.name
+where mvf.rnk = 1;
+
