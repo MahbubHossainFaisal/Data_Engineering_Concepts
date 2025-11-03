@@ -1,0 +1,21 @@
+WITH product_sales AS (
+    SELECT product_id, SUM(sales) AS product_sales
+    FROM orders
+    GROUP BY product_id
+),
+running_sales AS (
+    SELECT 
+        product_id, 
+        product_sales,
+        SUM(product_sales) OVER(ORDER BY product_sales DESC ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS running_sales,
+        SUM(product_sales) OVER() AS total_sales
+    FROM product_sales
+)
+SELECT * 
+FROM running_sales
+WHERE running_sales <= ROUND(total_sales * 0.8, 10);
+
+
+What I have learned?
+	- When I would try to sum running total I don't have to include PARTITION BY product_ids as then it would be limited to separate products. Will not combine the sum of sales of every product.
+	- If I want to keep the same value in every row, I don't have to use anything under OVER()
