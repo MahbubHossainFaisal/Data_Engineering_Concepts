@@ -1,0 +1,5 @@
+select manager_id, round(avg(salary),0) as avg_salary from emp
+where salary>5000 
+group by manager_id
+having avg(salary)>10000
+order by manager_id;
