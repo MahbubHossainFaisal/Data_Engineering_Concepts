@@ -1,0 +1,83 @@
+create table players
+(player_id int,
+group_id int);
+
+insert into players values (15,1);
+insert into players values (25,1);
+insert into players values (30,1);
+insert into players values (45,1);
+insert into players values (10,2);
+insert into players values (35,2);
+insert into players values (50,2);
+insert into players values (20,3);
+insert into players values (40,3);
+
+create table matches
+(
+match_id int,
+first_player int,
+second_player int,
+first_score int,
+second_score int);
+
+insert into matches values (1,15,45,3,0);
+insert into matches values (2,30,25,1,2);
+insert into matches values (3,30,15,2,0);
+insert into matches values (4,40,20,5,2);
+insert into matches values (5,35,50,1,1);
+
+select * from players;
+select * from matches;
+
+
+WITH match_details AS (
+    SELECT first_player AS player, first_score AS score
+    FROM matches
+    UNION ALL 
+    SELECT second_player AS player, second_score AS score 
+    FROM matches
+),
+player_scores AS (
+    SELECT m.player, SUM(m.score) AS total_score, p.group_id
+    FROM match_details m 
+    LEFT JOIN players p ON m.player = p.player_id
+    GROUP BY m.player, p.group_id
+),
+group_info AS (
+    SELECT 
+        ps.player,
+        ps.total_score,
+        MAX(ps.total_score) OVER (PARTITION BY ps.group_id) AS max_score,
+        ps.group_id
+    FROM player_scores ps
+)
+SELECT  group_id,min(player) as player_id ,total_score  as score FROM group_info
+where total_score = max_score
+group by total_score,group_id
+ORDER BY group_id,player_id;
+
+-- using MAX/SUM in PARTITION
+-- With ORDER BY: You get a running max/sum, which changes row by row.
+-- Without ORDER BY: You get the overall max/sum for the group, which is what you want in this case.
+---------------------------------------------------- RANK Method --------------------------------------------------------------------
+
+WITH match_details AS (
+    SELECT first_player AS player, first_score AS score
+    FROM matches
+    UNION ALL 
+    SELECT second_player AS player, second_score AS score 
+    FROM matches
+),
+player_scores AS (
+    SELECT m.player, SUM(m.score) AS total_score, p.group_id
+    FROM match_details m 
+    LEFT JOIN players p ON m.player = p.player_id
+    GROUP BY m.player, p.group_id
+),
+final_rank
+AS
+(
+select *,rank() OVER(PARTITION by group_id order by total_score DESC, player asc) as rnk from player_scores
+)
+select group_id, player as player_id, total_score as score from final_rank 
+where rnk=1;
