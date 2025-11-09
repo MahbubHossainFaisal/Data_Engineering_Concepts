@@ -1,0 +1,21 @@
+create table sales ( product_id int, period_start date, period_end date, average_daily_sales int ); 
+insert into sales values(1,'2019-01-25','2019-02-28',100),(2,'2018-12-01','2020-01-01',10),(3,'2019-12-01','2020-01-31',1);
+
+select * from sales;
+
+WITH RECURSIVE r_cte AS (
+  SELECT min(period_start) ::date AS min_date, max(period_end)::date AS max_date
+  from sales
+
+  UNION ALL
+  
+  SELECT (min_date + INTERVAL '1 day')::date, max_date
+  FROM r_cte
+  WHERE min_date + INTERVAL '1 day' <= max_date
+)
+select s.product_id,date_part('year',r.min_date) as report_year, sum(average_daily_sales) as total_amount
+from sales s 
+inner join r_cte r 
+on r.min_date between s.period_start::date and s.period_end::date
+group by s.product_id,report_year
+order by s.product_id,report_year;
