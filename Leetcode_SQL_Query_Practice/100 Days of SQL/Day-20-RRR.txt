@@ -1,0 +1,57 @@
+create table transactions(
+order_id int,
+cust_id int,
+order_date date,
+amount int
+);
+delete from transactions;
+insert into transactions values 
+(1,1,'2020-01-15',150)
+,(2,1,'2020-02-10',150)
+,(3,2,'2020-01-16',150)
+,(4,2,'2020-02-25',150)
+,(5,3,'2020-01-10',150)
+,(6,3,'2020-02-20',150)
+,(7,4,'2020-01-20',150)
+,(8,5,'2020-02-20',150)
+;
+
+select * from transactions order by cust_id,order_date;
+
+-- This is the same query that I have done in day 19. But that was for two months period only. Now I want to make it generalized so that it can work on any given month
+--range
+
+WITH monthly_customers AS (
+    SELECT DISTINCT EXTRACT(MONTH FROM order_date) AS month_number,
+           cust_id AS customer_id
+    FROM transactions
+),
+retention AS (
+    SELECT m2.month_number AS month_number, COUNT(*) AS customer_count
+    FROM monthly_customers m1
+    INNER JOIN monthly_customers m2
+        ON m1.customer_id = m2.customer_id
+        AND m2.month_number = m1.month_number + 1
+    GROUP BY m2.month_number
+)
+SELECT mc.month_number,
+       COALESCE(r.customer_count, 0) AS customer_count
+FROM (SELECT DISTINCT month_number FROM monthly_customers) mc
+LEFT JOIN retention r ON mc.month_number = r.month_number
+ORDER BY mc.month_number;
+
+
+WITH monthly_customers AS (
+    SELECT DISTINCT EXTRACT(MONTH FROM order_date) AS month_number, cust_id
+    FROM transactions
+),
+churn AS (
+    SELECT m1.month_number AS prev_month, COUNT(*) AS churn_count
+    FROM monthly_customers m1
+    LEFT JOIN monthly_customers m2
+        ON m1.cust_id = m2.cust_id
+        AND m2.month_number = m1.month_number + 1
+    WHERE m2.cust_id IS NULL
+    GROUP BY m1.month_number
+)
+SELECT * FROM churn;
