@@ -1,0 +1,24 @@
+create table UserActivity
+(
+username      varchar(20) ,
+activity      varchar(20),
+startDate     Date   ,
+endDate      Date
+);
+
+insert into UserActivity values 
+('Alice','Travel','2020-02-12','2020-02-20')
+,('Alice','Dancing','2020-02-21','2020-02-23')
+,('Alice','Travel','2020-02-24','2020-02-28')
+,('Bob','Travel','2020-02-11','2020-02-18');
+
+select * from UserActivity;
+
+with activity_rank as
+(
+select username, activity,startDate, endDate, row_number() over(partition by username order by endDate) as activity_rnk,
+count(1) OVER(partition by username) as total_activity_count
+from UserActivity
+)
+select username,activity,startDate,endDate,total_activity_count as total_activities, activity_rnk as rnk from activity_rank
+where (total_activity_count>1 and activity_rnk = 2) or (activity_rnk=1 and total_activity_count=1)
