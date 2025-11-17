@@ -1,0 +1,51 @@
+CREATE table activity
+(
+user_id varchar(20),
+event_name varchar(20),
+event_date date,
+country varchar(20)
+);
+delete from activity;
+insert into activity values (1,'app-installed','2022-01-01','India')
+,(1,'app-purchase','2022-01-02','India')
+,(2,'app-installed','2022-01-01','USA')
+,(3,'app-installed','2022-01-01','USA')
+,(3,'app-purchase','2022-01-03','USA')
+,(4,'app-installed','2022-01-03','India')
+,(4,'app-purchase','2022-01-03','India')
+,(5,'app-installed','2022-01-03','SL')
+,(5,'app-purchase','2022-01-03','SL')
+,(6,'app-installed','2022-01-04','Pakistan')
+,(6,'app-purchase','2022-01-04','Pakistan');
+
+select * from activity;
+
+--- One variation
+
+with paid_users 
+as 
+(
+select event_name, CASE WHEN country='India' then country WHEN country='USA' then country else 'OTHERS' END as country,
+count(distinct user_id) as total_paid_users
+from activity
+where event_name = 'app-purchase'
+group by event_name,CASE WHEN country='India' then country WHEN country='USA' then country else 'OTHERS' END
+)
+select country, round(total_paid_users/(select sum(total_paid_users) from paid_users),2)  as percentage_of_users
+from paid_users;
+
+-- Another variation
+with paid_users 
+as 
+(
+select event_name, CASE WHEN country='India' then country WHEN country='USA' then country else 'OTHERS' END as country,
+count(distinct user_id) as total_paid_users
+from activity
+where event_name = 'app-purchase'
+group by event_name,CASE WHEN country='India' then country WHEN country='USA' then country else 'OTHERS' END
+),
+total as
+(
+select sum(total_paid_users) as total_users from paid_users
+)
+select country, round(total_paid_users/total_users,2) as paid_user_percentage from paid_users,total;
