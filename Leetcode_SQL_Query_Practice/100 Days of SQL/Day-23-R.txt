@@ -1,0 +1,50 @@
+CREATE table activity
+(
+user_id varchar(20),
+event_name varchar(20),
+event_date date,
+country varchar(20)
+);
+delete from activity;
+insert into activity values (1,'app-installed','2022-01-01','India')
+,(1,'app-purchase','2022-01-02','India')
+,(2,'app-installed','2022-01-01','USA')
+,(3,'app-installed','2022-01-01','USA')
+,(3,'app-purchase','2022-01-03','USA')
+,(4,'app-installed','2022-01-03','India')
+,(4,'app-purchase','2022-01-03','India')
+,(5,'app-installed','2022-01-03','SL')
+,(5,'app-purchase','2022-01-03','SL')
+,(6,'app-installed','2022-01-04','Pakistan')
+,(6,'app-purchase','2022-01-04','Pakistan');
+
+select *,to_char(event_date,'Day'), TO_CHAR(event_date - INTERVAL '1 day', '"Week" WW') as week from activity order by event_date;
+
+
+select TO_CHAR(event_date - INTERVAL '1 day', '"Week" WW') as week, count(distinct user_id)
+from activity
+group by week order by week DESC;
+
+
+-- users who installed and purchased on the same day
+
+with unique_dates as
+(
+select distinct event_date from activity order by event_date
+)
+,user_purchased_same_day as
+(
+select i.user_id, i.event_name, i.event_date, i.country,p.event_name
+from activity i 
+inner join activity p
+on i.user_id = p.user_id
+and i.event_date = p.event_date
+and i.country = p.country
+where i.event_name = 'app-purchase' and p.event_name = 'app-installed'
+)
+select distinct a.event_date, count(ud.user_id)
+from unique_dates a 
+left join user_purchased_same_day ud 
+on a.event_date = ud.event_date
+group by a.event_date
+order by a.event_date
