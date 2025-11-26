@@ -1,0 +1,69 @@
+CREATE TABLE STORES (
+Store varchar(10),
+Quarter varchar(10),
+Amount int);
+
+INSERT INTO STORES (Store, Quarter, Amount)
+VALUES ('S1', 'Q1', 200),
+('S1', 'Q2', 300),
+('S1', 'Q4', 400),
+('S2', 'Q1', 500),
+('S2', 'Q3', 600),
+('S2', 'Q4', 700),
+('S3', 'Q1', 800),
+('S3', 'Q2', 750),
+('S3', 'Q3', 900);
+
+select * from STORES;
+-- First method recursive cte
+with recursive master_quarter 
+as
+(
+select distinct store, 1 as Quarter
+from stores
+union all
+select store, Quarter+1 as Quarter from master_quarter
+where Quarter<4
+)--select * from master_quarter;
+,
+extract_info
+as
+(
+select mq.store,mq.Quarter, s.amount 
+from master_quarter mq 
+left join stores s 
+on mq.store = s.store 
+and mq.Quarter=cast(right(s.Quarter,1) as integer)
+order by Quarter,mq.Quarter
+)
+select store,'Q' || Quarter as q_no from extract_info where amount is null order by store,q_no;
+
+-- Easiest method with math calculation.
+-- Quarters are 4, -> 1+2+3+4 = 10, so if we can subtract total quarter number from 10 then we would get the missing one.
+
+select store, 'Q' || 10-sum(CAST(substring(quarter from 2) as integer)) as q_no from 
+stores 
+group by store;
+
+
+-- using cross join 
+
+-- First method recursive cte
+with recursive master_quarter 
+as
+(
+select distinct s1.store, s2.Quarter
+from stores s1, stores s2
+)--select * from master_quarter;
+,
+extract_info
+as
+(
+select mq.store,mq.Quarter, s.amount 
+from master_quarter mq 
+left join stores s 
+on mq.store = s.store 
+and mq.Quarter=s.Quarter
+order by Quarter,mq.Quarter
+)
+select store, Quarter as q_no from extract_info where amount is null order by store,q_no;
