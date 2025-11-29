@@ -1,0 +1,53 @@
+-- Find cities where covid cases are increasing?
+
+create table covid(city varchar(50),days date,cases int);
+delete from covid;
+insert into covid values('DELHI','2022-01-01',100);
+insert into covid values('DELHI','2022-01-02',200);
+insert into covid values('DELHI','2022-01-03',300);
+
+insert into covid values('MUMBAI','2022-01-01',100);
+insert into covid values('MUMBAI','2022-01-02',100);
+insert into covid values('MUMBAI','2022-01-03',300);
+
+insert into covid values('CHENNAI','2022-01-01',100);
+insert into covid values('CHENNAI','2022-01-02',200);
+insert into covid values('CHENNAI','2022-01-03',150);
+
+insert into covid values('BANGALORE','2022-01-01',100);
+insert into covid values('BANGALORE','2022-01-02',300);
+insert into covid values('BANGALORE','2022-01-03',200);
+insert into covid values('BANGALORE','2022-01-04',400);
+
+select * from covid;
+
+-- My Solution (unnecessary rank logic)
+with next_days
+as
+(
+select *, lead(cases,1) over(partition by city order by days) as next_day_cases
+from covid
+),
+ranking as
+(
+select *, case when next_day_cases<=cases then rank() over(partition by city order by days) else 0 end as rnk from next_days
+)
+select city from ranking
+group by city
+having sum(rnk)=0;
+
+-- Optimized solution 
+
+WITH next_days AS (
+    SELECT 
+        city,
+        cases,
+        LEAD(cases) OVER (PARTITION BY city ORDER BY days) AS next_day_cases
+    FROM covid
+)
+SELECT city
+FROM next_days
+GROUP BY city
+HAVING SUM(CASE WHEN next_day_cases <= cases THEN 1 ELSE 0 END) = 0;
+
+
