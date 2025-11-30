@@ -1,0 +1,51 @@
+CREATE TABLE students(
+ studentid int NULL,
+ studentname varchar(255) NULL,
+ subject varchar(255) NULL,
+ marks int NULL,
+ testid int NULL,
+ testdate date NULL
+);
+insert into students values (2,'Max Ruin','Subject1',63,1,'2022-01-02');
+insert into students values (3,'Arnold','Subject1',95,1,'2022-01-02');
+insert into students values (4,'Krish Star','Subject1',61,1,'2022-01-02');
+insert into students values (5,'John Mike','Subject1',91,1,'2022-01-02');
+insert into students values (4,'Krish Star','Subject2',71,1,'2022-01-02');
+insert into students values (3,'Arnold','Subject2',32,1,'2022-01-02');
+insert into students values (5,'John Mike','Subject2',61,2,'2022-11-02');
+insert into students values (1,'John Deo','Subject2',60,1,'2022-01-02');
+insert into students values (2,'Max Ruin','Subject2',84,1,'2022-01-02');
+insert into students values (2,'Max Ruin','Subject3',29,3,'2022-01-03');
+insert into students values (5,'John Mike','Subject3',98,2,'2022-11-02');
+
+
+-- SQL query to find percentage of students who got >=90% marks.
+
+SELECT round(COUNT(DISTINCT studentid) * 1.0 /
+       (SELECT COUNT(DISTINCT studentid) FROM students),2) * 100 || '%' as percentage
+FROM students
+WHERE marks >= 90;
+
+
+-- get the second highest and second lowest marks for each Subject
+
+with subject_ranking as
+(
+select subject,marks,row_number() over(partition by subject order by marks desc) as highest_rnk,
+row_number() over(partition by subject order by marks) as lowest_rnk from students
+),
+second_highest_marks as
+(
+select subject,marks as second_highest
+from subject_ranking where highest_rnk =2
+),
+second_lowest_marks as
+(
+select subject,marks as second_lowest
+from subject_ranking where lowest_rnk =2
+)
+
+select h.subject, h.second_highest, l.second_lowest
+from second_highest_marks h 
+inner join second_lowest_marks l
+on h.subject = l.subject;
