@@ -1,0 +1,34 @@
+-- Find how many products fits in customer budget
+
+create table products
+(
+product_id varchar(20) ,
+cost int
+);
+insert into products values ('P1',200),('P2',300),('P3',500),('P4',800);
+
+create table customer_budget
+(
+customer_id int,
+budget int
+);
+
+insert into customer_budget values (100,400),(200,800),(300,1500);
+
+
+with cumulative_product_cost as 
+(
+ select product_id, cost, sum(cost) over(order by cost) as cumulative_cost
+ from products
+),
+products_within_budget as 
+(
+select c.customer_id, c.budget, cp.product_id, cp.cumulative_cost
+from customer_budget c 
+inner join cumulative_product_cost cp
+on cp.cumulative_cost <= c.budget
+)
+select customer_id, min(budget) as budget, count(1) as number_of_products,  string_agg(product_id,',') as list_of_products
+from products_within_budget
+group by customer_id
+order by customer_id;
