@@ -1,0 +1,49 @@
+create table players_location
+(
+name varchar(20),
+city varchar(20)
+);
+delete from players_location;
+insert into players_location
+values ('Sachin','Mumbai'),('Virat','Delhi') , ('Rahul','Bangalore'),('Rohit','Mumbai'),('Mayank','Bangalore');
+
+
+
+
+-- Method 1
+
+with Bangalore_city as
+(
+select name,Row_Number() over(partition by city order by name) as rnk from players_location where city='Bangalore'
+),
+Mumbai_city as
+(
+select name,Row_Number() over(partition by city order by name) as rnk from players_location where city='Mumbai'
+),
+Delhi_city as
+(
+select name ,Row_Number() over(partition by city order by name) as rnk from players_location where city='Delhi'
+)
+select b.name as Bangalore, m.name as Mumbai, d.name as Delhi
+from Bangalore_city b 
+left join Mumbai_city m 
+on b.rnk = m.rnk
+left join Delhi_city d 
+on b.rnk = d.rnk ;
+
+
+-- Method 2 (Optimized)
+
+select case when city='Bangalore' then name end as Bangalore,
+       case when city='Mumbai' then name end as Mumbai,
+       case when city='Delhi' then name end as Delhi
+       from
+(select *,row_number() over(partition by city order by name) as rnk from players_location) A;
+
+select min(case when city='Bangalore' then name end) as Bangalore,
+       min(case when city='Mumbai' then name end) as Mumbai,
+       min(case when city='Delhi' then name end) as Delhi
+       from
+(select *,row_number() over(partition by city order by name) as rnk from players_location) A
+group by rnk
+order by rnk;
