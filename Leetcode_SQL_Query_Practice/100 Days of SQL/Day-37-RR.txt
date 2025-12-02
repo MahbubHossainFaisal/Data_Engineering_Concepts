@@ -1,0 +1,48 @@
+create table employee 
+(
+emp_id int,
+company varchar(10),
+salary int
+);
+
+insert into employee values (1,'A',2341);
+insert into employee values (2,'A',341);
+insert into employee values (3,'A',15);
+insert into employee values (4,'A',15314);
+insert into employee values (5,'A',451);
+insert into employee values (6,'A',513);
+insert into employee values (7,'B',15);
+insert into employee values (8,'B',13);
+insert into employee values (9,'B',1154);
+insert into employee values (10,'B',1345);
+insert into employee values (11,'B',1221);
+insert into employee values (12,'B',234);
+insert into employee values (13,'C',2345);
+insert into employee values (14,'C',2645);
+insert into employee values (15,'C',2645);
+insert into employee values (16,'C',2652);
+insert into employee values (17,'C',65);
+
+with cte as
+(
+select * from 
+(select *,row_number() over(partition by company order by salary) as asc_ord,
+(COUNT(*) OVER (PARTITION BY company) - ROW_NUMBER() OVER (PARTITION BY company ORDER BY salary) + 1) AS  desc_ord from employee) A 
+where abs(asc_ord - desc_ord) = 1 or asc_ord=desc_ord
+)
+select company,round(avg(salary),0) as median_salary from cte
+group by company
+order by company;
+
+
+-- When there are duplicates ROW_NUMBER() OVER (PARTITION BY company ORDER BY salary DESC) Doesn't give 4 3 2 1 instead gives 4 2 3 1 
+-- So in order to get rid of this we have to use this technique (COUNT(*) OVER (PARTITION BY company) - ROW_NUMBER() OVER (PARTITION BY company ORDER BY salary) + 1)
+-- Example 
+-- count(*) = 6 - first rownumber 1 + 1 = 6 
+-- 6-2+1 = 5 
+-- 6-3+1 = 4 
+-- 3 
+-- 2
+-- 1 
+
+-- This is how we will get the reverse order properly.
