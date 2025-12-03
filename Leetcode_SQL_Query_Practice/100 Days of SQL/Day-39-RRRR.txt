@@ -1,0 +1,45 @@
+create table stadium (
+id int,
+visit_date date,
+no_of_people int
+);
+
+insert into stadium
+values (1,'2017-07-01',10)
+,(2,'2017-07-02',109)
+,(3,'2017-07-03',150)
+,(4,'2017-07-04',99)
+,(5,'2017-07-05',145)
+,(6,'2017-07-06',1455)
+,(7,'2017-07-07',199)
+,(8,'2017-07-08',188);
+
+
+WITH ranking AS (
+    SELECT *,
+           CASE WHEN no_of_people > 100 THEN RANK() OVER (ORDER BY visit_date) ELSE 0 END AS rnk
+    FROM stadium
+),
+segmented AS (
+    SELECT *,
+           SUM(CASE WHEN rnk = 0 THEN 1 ELSE 0 END)
+               OVER (ORDER BY visit_date ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS segment_id
+    FROM ranking
+),
+consecutive_count AS
+(SELECT
+    id,
+    visit_date,
+    no_of_people,
+    rnk,
+    segment_id,
+    CASE
+        WHEN rnk = 0 THEN 0
+        ELSE COUNT(*) OVER (PARTITION BY segment_id) - 1 -- count rows in the same segment
+    END AS cnt
+FROM segmented
+ORDER BY visit_date
+)
+select id,visit_date,no_of_people
+from consecutive_count
+where cnt>=3;
