@@ -1,0 +1,35 @@
+create table business_city (
+business_date date,
+city_id int
+);
+delete from business_city;
+insert into business_city
+values(cast('2020-01-02' as date),3),(cast('2020-07-01' as date),7),(cast('2021-01-01' as date),3),(cast('2021-02-03' as date),19)
+,(cast('2022-12-01' as date),3),(cast('2022-12-15' as date),3),(cast('2022-02-28' as date),12);
+
+
+-- write a sql query to find the new cities udaan has started operations it's business in each year. Remember if one city is explored in a year then
+-- it can not be count in the next year though operations may happen
+
+
+-- My solution
+with ranking_city
+as
+(
+select *,row_number() over(partition by city_id order by business_date) as rnk from business_city
+)
+select extract(year from business_date) as year ,count(city_id) from ranking_city where rnk=1
+group by extract(year from business_date);
+
+-- More optimized
+
+WITH first_city_date AS (
+  SELECT city_id, MIN(business_date) AS first_date
+  FROM business_city
+  GROUP BY city_id
+)
+SELECT EXTRACT(YEAR FROM first_date) AS year,
+       COUNT(*) AS new_cities
+FROM first_city_date
+GROUP BY EXTRACT(YEAR FROM first_date)
+ORDER BY year;
