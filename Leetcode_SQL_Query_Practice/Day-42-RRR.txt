@@ -1,0 +1,31 @@
+create table brands 
+(
+category varchar(20),
+brand_name varchar(20)
+);
+insert into brands values
+('chocolates','5-star')
+,(null,'dairy milk')
+,(null,'perk')
+,(null,'eclair')
+,('Biscuits','britannia')
+,(null,'good day')
+,(null,'boost');
+
+with ranking as 
+(
+select *,row_number() over(order by null) as row_num from brands
+),
+filtered_ranking 
+as
+(
+select * from ranking where category is not null
+),
+range_ranks as
+(
+select *, lead(row_num,1) OVER(order by null) as next_row_num from filtered_ranking
+)
+select a.category,b.brand_name
+from range_ranks a 
+left join 
+ranking b on a.row_num <= b.row_num and a.next_row_num>b.row_num or (a.row_num<=b.row_num and a.next_row_num is null)
