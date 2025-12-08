@@ -1,0 +1,71 @@
+
+/*
+
+Problem Statement:
+Write an SQL query to report the students (student_id, student_name) who are "quiet" in ALL exams.
+
+A "quiet" student is defined as one who:
+
+Took at least one exam.
+Did not score the highest score or the lowest score in any of the exams.
+
+
+Do not return students who have never taken any exam.
+Return the result table ordered by student_id.
+
+*/
+
+create table students
+(
+student_id int,
+student_name varchar(20)
+);
+insert into students values
+(1,'Daniel'),(2,'Jade'),(3,'Stella'),(4,'Jonathan'),(5,'Will');
+
+create table exams
+(
+exam_id int,
+student_id int,
+score int);
+
+insert into exams values
+(10,1,70),(10,2,80),(10,3,90),(20,1,80),(30,1,70),(30,3,80),(30,4,90),(40,1,60)
+,(40,2,70),(40,4,80);
+
+with cte as 
+(
+select *,max(score) over(partition by exam_id) as highest_score, min(score) over(partition by exam_id) as lowest_score from exams
+)
+
+select distinct student_id from cte where student_id not in (select distinct student_id from cte where score=highest_score or score=lowest_score);
+
+
+-- More accurate query which covers all scenarios
+
+
+WITH cte AS (
+    SELECT
+        exam_id,
+        student_id,
+        score,
+        MAX(score) OVER (PARTITION BY exam_id) AS highest_score,
+        MIN(score) OVER (PARTITION BY exam_id) AS lowest_score
+    FROM exams
+)
+SELECT s.student_id, s.student_name
+FROM students AS s
+WHERE EXISTS (
+    -- ensure the student took at least one exam
+    SELECT 1
+    FROM cte AS e_any
+    WHERE e_any.student_id = s.student_id
+)
+AND NOT EXISTS (
+    -- exclude if they were highest or lowest in any exam they took
+    SELECT 1
+    FROM cte AS e_bad
+    WHERE e_bad.student_id = s.student_id
+      AND (e_bad.score = e_bad.highest_score OR e_bad.score = e_bad.lowest_score)
+)
+ORDER BY s.student_id;
