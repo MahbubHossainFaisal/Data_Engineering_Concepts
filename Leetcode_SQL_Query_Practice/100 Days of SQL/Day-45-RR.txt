@@ -1,0 +1,94 @@
+/*
+Here’s the statement extracted from the image:
+
+    A company wants to hire new employees. The budget of the company for the salaries is $70000.
+    The company's criteria for hiring are:
+    - Keep hiring the senior with the smallest salary until you cannot hire any more seniors.
+    - Use the remaining budget to hire the junior with the smallest salary.
+    - Keep hiring the junior with the smallest salary until you cannot hire any more juniors.
+
+    Write an SQL query to find the seniors and juniors hired under the mentioned criteria.
+
+
+*/
+
+
+create table candidates (
+emp_id int,
+experience varchar(20),
+salary int
+);
+delete from candidates;
+insert into candidates values
+(1,'Junior',10000),(2,'Junior',15000),(3,'Junior',40000),(4,'Senior',16000),(5,'Senior',20000),(6,'Senior',50000);
+
+-- My solution
+
+with hire_senior as
+(
+select *,sum(salary) over(partition by experience order by salary asc rows between unbounded preceding and current row) as running_salary,
+70000-sum(salary) over(partition by experience order by salary asc rows between unbounded preceding and current row) as remaining_total
+  from candidates
+where experience='Senior'
+),
+hire_junior as 
+(
+select *,sum(salary) over(partition by experience order by salary asc rows between unbounded preceding and current row) as running_salary,
+(select remaining_total from hire_senior where remaining_total>=0
+order by remaining_total asc limit 1) - sum(salary) over(partition by experience order by salary asc rows between unbounded preceding and current row) as remaining_total
+  from candidates
+  where experience='Junior'
+)
+select emp_id,experience,salary,running_salary
+from hire_junior where remaining_total>=0
+union 
+select emp_id,experience,salary,running_salary
+from hire_senior where remaining_total>=0
+order by emp_id
+;
+
+
+-- Solution which validates edge cases
+
+
+WITH
+-- Seniors ordered deterministically by (salary, emp_id)
+senior_ordered AS (
+  SELECT emp_id, experience, salary,
+         SUM(salary) OVER (ORDER BY salary ASC, emp_id ASC
+                           ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS running_salary
+  FROM candidates
+  WHERE experience = 'Senior'
+),
+-- Seniors we can afford (cumulative sum <= 70000)
+hired_seniors AS (
+  SELECT emp_id, experience, salary, running_salary
+  FROM senior_ordered
+  WHERE running_salary <= 70000
+),
+-- Remaining budget after hiring seniors (if none hired, remaining is full budget)
+remaining AS (
+  SELECT 70000 - COALESCE(MAX(running_salary), 0) AS rem
+  FROM hired_seniors
+),
+-- Juniors ordered deterministically by (salary, emp_id)
+junior_ordered AS (
+  SELECT emp_id, experience, salary,
+         SUM(salary) OVER (ORDER BY salary ASC, emp_id ASC
+                           ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS running_salary
+  FROM candidates
+  WHERE experience = 'Junior'
+),
+-- Juniors we can afford within the remaining budget
+hired_juniors AS (
+  SELECT j.emp_id, j.experience, j.salary, j.running_salary
+  FROM junior_ordered j
+  CROSS JOIN remaining r
+  WHERE j.running_salary <= r.rem
+)
+SELECT emp_id, experience, salary
+FROM hired_seniors
+UNION ALL
+SELECT emp_id, experience, salary
+FROM hired_juniors
+ORDER BY emp_id;
