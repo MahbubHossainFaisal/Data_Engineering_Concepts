@@ -1,0 +1,46 @@
+/*
+--write a query to print total rides and profit rides for each driver
+--profit ride is when the end location of current ride is same as start location on next ride
+
+*/
+
+create table drivers(id varchar(10), start_time time, end_time time, start_loc varchar(10), end_loc varchar(10));
+insert into drivers values('dri_1', '09:00', '09:30', 'a','b'),('dri_1', '09:30', '10:30', 'b','c'),('dri_1','11:00','11:30', 'd','e');
+insert into drivers values('dri_1', '12:00', '12:30', 'f','g'),('dri_1', '13:30', '14:30', 'c','h');
+insert into drivers values('dri_2', '12:15', '12:30', 'f','g'),('dri_2', '13:30', '14:30', 'c','h');
+
+-- Solution 1
+with cte as
+(
+select *, lead(start_loc,1) over(partition by id order by start_time) as next_start_loc from drivers
+),
+cte2 as
+(
+select *, CASE WHEN end_loc = next_start_loc then 1 else 0 end as count_profit
+from cte
+)
+select id,count(start_time) as total_rides, sum(count_profit) as profit_rides from cte2
+group by id;
+
+
+-- Solution 2 (SELF JOIN)
+
+WITH numbered AS (
+  SELECT d.*,
+         ROW_NUMBER() OVER (PARTITION BY id ORDER BY start_time) AS rn
+  FROM drivers AS d
+),
+paired AS (
+  SELECT a.id,
+         a.start_loc AS a_start_location,
+         a.end_loc   AS a_end_location,
+         b.start_loc AS b_start_location
+  FROM numbered AS a
+  LEFT JOIN numbered AS b
+    ON a.id = b.id
+   AND b.rn = a.rn + 1
+)
+SELECT id,
+       COUNT(*) AS total_rides,
+       SUM(CASE WHEN a_end_location = b_start_location THEN 1 ELSE 0 END) AS profit_rides
+FROM paired
