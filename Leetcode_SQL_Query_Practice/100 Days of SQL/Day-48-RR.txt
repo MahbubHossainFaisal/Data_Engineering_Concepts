@@ -1,0 +1,73 @@
+/*
+Problem
+    -- Write a sql query to find users who purchased different products on different dates
+    -- ie : products purchased on any given day are not repeated on any other day
+
+*/
+
+
+
+CREATE TABLE purchase_history (
+    userid INT,
+    productid INT,
+    purchasedate DATE
+);
+
+INSERT INTO purchase_history VALUES
+(1, 1, '2012-01-23'),
+(1, 2, '2012-01-23'),
+(1, 3, '2012-01-25'),
+(2, 1, '2012-01-23'),
+(2, 2, '2012-01-23'),
+(2, 2, '2012-01-25'),
+(2, 4, '2012-01-25'),
+(3, 4, '2012-01-23'),
+(3, 1, '2012-01-23'),
+(4, 1, '2012-01-23'),
+(4,2,'2012-01-25');
+
+
+-- My solution
+
+with multiple_dates
+as
+(
+select userid, purchasedate, count(distinct purchasedate) as purchasedate_count 
+from purchase_history
+group by userid,purchasedate
+order by userid
+)
+--select * from multiple_dates;
+,
+multi_products as
+(
+select userid,productid, count(*) as total_product_count 
+from purchase_history
+group by userid,productid
+order by userid
+)
+select distinct userid from multi_products where userid not in (select userid from multi_products where total_product_count>=2) and userid not in
+(select userid from multiple_dates group by userid having count(*)=1)
+order by userid;
+
+
+-- Easier solution 
+
+
+SELECT DISTINCT userid
+FROM purchase_history
+WHERE userid IN (
+    -- Users with multiple dates
+    SELECT userid
+    FROM purchase_history
+    GROUP BY userid
+    HAVING COUNT(DISTINCT purchasedate) > 1
+)
+AND userid NOT IN (
+    -- Users with repeated products
+    SELECT userid
+    FROM purchase_history
+    GROUP BY userid, productid
+    HAVING COUNT(DISTINCT purchasedate) > 1
+)
+ORDER BY userid;
