@@ -1,0 +1,55 @@
+/*
+Write SQL to find all pairs of trades for the same stock that occurred within a 10-second interval and have a price difference greater than 10%.
+The output should also include the percentage of the price difference between the two trades."
+
+*/
+
+Create Table Trade_tbl(
+TRADE_ID varchar(20),
+Trade_Timestamp time,
+Trade_Stock varchar(20),
+Quantity int,
+Price Float
+);
+
+Insert into Trade_tbl Values('TRADE1','10:01:05','ITJunction4All',100,20);
+Insert into Trade_tbl Values('TRADE2','10:01:06','ITJunction4All',20,15);
+Insert into Trade_tbl Values('TRADE3','10:01:08','ITJunction4All',150,30);
+Insert into Trade_tbl Values('TRADE4','10:01:09','ITJunction4All',300,32);
+Insert into Trade_tbl Values('TRADE5','10:10:00','ITJunction4All',-100,19);
+Insert into Trade_tbl Values('TRADE6','10:10:01','ITJunction4All',-300,19);
+
+
+WITH cte AS 
+(
+  SELECT
+    a.trade_id        AS a_trade_id,
+    a.trade_timestamp AS a_trade_timestamp,
+    a.trade_stock     AS a_trade_stock,
+    a.Quantity        AS a_trade_quantity,
+    a.price           AS a_trade_price,
+    b.trade_id        AS b_trade_id,
+    b.trade_timestamp AS b_trade_timestamp,
+    b.trade_stock     AS b_trade_stock,
+    b.price           AS b_trade_price,
+    b.Quantity        AS b_trade_quantity,
+    ROUND(
+      (100.0 * ABS(b.price - a.price) / NULLIF(a.price, 0))::numeric,
+      2
+    ) AS pct_diff
+  FROM Trade_tbl a 
+  CROSS JOIN Trade_tbl b 
+  WHERE a.trade_stock = b.trade_stock
+    AND (b.trade_timestamp - a.trade_timestamp)
+          BETWEEN interval '-10 seconds' AND interval '10 seconds'
+    AND 100.0 * ABS(b.price - a.price) / NULLIF(a.price, 0) > 10
+)
+SELECT
+  a_trade_id        AS first_trade,
+  b_trade_id        AS second_trade,
+  a_trade_price     AS first_trade_price,
+  b_trade_price     AS second_trade_price,
+  pct_diff          AS percentdiff
+FROM cte
+WHERE a_trade_id < b_trade_id
+order by a_trade_id,b_trade_id;
