@@ -1,0 +1,43 @@
+-- Section 52
+
+create table hall_events
+(
+hall_id integer,
+start_date date,
+end_date date
+);
+
+insert into hall_events values 
+(1,'2023-01-13','2023-01-14')
+,(1,'2023-01-14','2023-01-17')
+,(1,'2023-01-15','2023-01-17')
+,(1,'2023-01-18','2023-01-25')
+,(2,'2022-12-09','2022-12-23')
+,(2,'2022-12-13','2022-12-17')
+,(3,'2022-12-01','2023-01-30');
+
+select *,row_number() over(order by hall_id,start_date) as rnk from hall_events;
+
+
+with recursive ranking_dates as 
+(
+select *,row_number() over(order by hall_id, start_date) as rnk from hall_events
+),
+info as
+(
+select hall_id,start_date,end_date,rnk,1 as flag from ranking_dates where rnk=1 
+
+union all 
+
+select rd.hall_id,rd.start_date,rd.end_date,rd.rnk, 
+case when i.hall_id = rd.hall_id and (i.end_date between rd.start_date and rd.end_date)
+or (rd.start_date between i.start_date and i.end_date) then 0 else 1 end + flag as flag
+from info i 
+inner join  ranking_dates rd
+on i.rnk+1=rd.rnk
+
+)
+select hall_id,min(start_date) as min_date, max(end_date) as max_date
+from info
+group by hall_id,flag
+order by hall_id;
