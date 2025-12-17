@@ -1,0 +1,51 @@
+create table emp(
+emp_id int,
+emp_name varchar(20),
+department_id int,
+salary int,
+manager_id int,
+emp_age int);
+
+insert into emp
+values
+(1, 'Ankit', 100,10000, 4, 39);
+insert into emp
+values (2, 'Mohit', 100, 15000, 5, 48);
+insert into emp
+values (3, 'Vikas', 100, 10000,4,37);
+insert into emp
+values (4, 'Rohit', 100, 5000, 2, 16);
+insert into emp
+values (5, 'Mudit', 200, 12000, 6,55);
+insert into emp
+values (6, 'Agam', 200, 12000,2, 14);
+insert into emp
+values (7, 'Sanjay', 200, 9000, 2,13);
+insert into emp
+values (8, 'Ashish', 200,5000,2,12);
+insert into emp
+values (9, 'Mukesh',300,6000,6,51);
+insert into emp
+values (10, 'Rakesh',300,7000,6,50);
+
+
+with agg_info as 
+(
+select department_id,CAST(avg(salary) AS INT) AS dep_avg,count(emp_id) as no_of_emp, sum(salary) as total_salary
+from emp
+group by department_id
+order by department_id
+),
+without_dep as
+(
+select a.department_id as a_dep_id, a.dep_avg as a_dep_avg, 
+ CAST(avg(b.dep_avg) AS INT) as b_dep_avg, sum(b.no_of_emp) as b_no_of_emp, sum(b.total_salary) as b_total_sal,
+ CAST((sum(b.total_salary)/sum(b.no_of_emp)) AS INT) as avg_company_salary
+from agg_info a 
+inner join agg_info b 
+on a.department_id <> b.department_id
+group by a.department_id, a.dep_avg
+)
+select a_dep_id as department_id,a_dep_avg as dep_avg,b_no_of_emp as no_of_emp,
+b_total_sal as total_salary,avg_company_salary as company_avg_salary from without_dep
+where a_dep_avg < avg_company_salary;
