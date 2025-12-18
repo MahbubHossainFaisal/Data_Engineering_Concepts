@@ -1,0 +1,39 @@
+create table namaste_orders
+(
+order_id int,
+city varchar(10),
+sales int
+);
+
+create table namaste_returns
+(
+order_id int,
+return_reason varchar(20)
+);
+
+insert into namaste_orders
+values(1, 'Mysore' , 100),(2, 'Mysore' , 200),(3, 'Bangalore' , 250),(4, 'Bangalore' , 150)
+,(5, 'Mumbai' , 300),(6, 'Mumbai' , 500),(7, 'Mumbai' , 800);
+insert into namaste_returns values
+(3,'wrong item'),(6,'bad quality'),(7,'wrong item');
+
+select * from namaste_orders;
+select * from namaste_returns;
+
+with city_order_returns
+as
+(
+select a.city,b.return_reason, case when return_reason is not null then 1 else 0 end as count_return
+from namaste_orders a
+left join namaste_returns b 
+on a.order_id = b.order_id
+)
+select city,sum(count_return) as no_of_returned_orders from city_order_returns
+group by city
+having sum(count_return)=0;
+
+
+-- Solution 2 
+
+select distinct city, 0 as no_of_returned_orders from namaste_orders
+where city not in (select distinct city from namaste_orders where order_id in (select order_id from namaste_returns))
