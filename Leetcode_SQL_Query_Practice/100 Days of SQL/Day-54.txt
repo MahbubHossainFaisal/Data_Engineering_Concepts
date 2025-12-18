@@ -1,0 +1,42 @@
+CREATE TABLE travel_data (
+    customer VARCHAR(10),
+    start_loc VARCHAR(50),
+    end_loc VARCHAR(50)
+);
+
+INSERT INTO travel_data (customer, start_loc, end_loc) VALUES
+    ('c1', 'New York', 'Lima'),
+    ('c1', 'London', 'New York'),
+    ('c1', 'Lima', 'Sao Paulo'),
+    ('c1', 'Sao Paulo', 'New Delhi'),
+    ('c2', 'Mumbai', 'Hyderabad'),
+    ('c2', 'Surat', 'Pune'),
+    ('c2', 'Hyderabad', 'Surat'),
+    ('c3', 'Kochi', 'Kurnool'),
+    ('c3', 'Lucknow', 'Agra'),
+    ('c3', 'Agra', 'Jaipur'),
+    ('c3', 'Jaipur', 'Kochi');
+    
+  
+with start_location as
+(
+select a.customer, a.start_loc as a_start_loc 
+from travel_data a
+left join travel_data b 
+on a.customer = b.customer
+and a.start_loc = b.end_loc
+where b.end_loc is null
+),
+end_location as
+(
+select a.customer, a.end_loc as a_end_loc 
+from travel_data a
+left join travel_data b 
+on a.customer = b.customer
+and a.end_loc = b.start_loc
+where b.start_loc is null
+)
+select  a.customer,a.a_start_loc,b.a_end_loc
+from start_location a 
+inner join end_location b 
+on a.customer = b.customer;
