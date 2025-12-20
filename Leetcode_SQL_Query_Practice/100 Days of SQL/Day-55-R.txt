@@ -1,0 +1,68 @@
+create table customers  (customer_name varchar(30));
+insert into customers values ('Ankit Bansal')
+,('Vishal Pratap Singh')
+,('Michael'); 
+
+
+select customer_name,length(customer_name)-length(replace(customer_name,' ','')) as no_of_spaces, 
+
+CASE WHEN length(customer_name)-length(replace(customer_name,' ',''))>=1 Then length(split_part(customer_name,' ',1))+1
+ELSE 0 END as first_space_position,
+CASE WHEN length(customer_name)-length(replace(customer_name,' ',''))=2 
+Then (length(split_part(customer_name,' ',1))+length(split_part(customer_name,' ',2))+2)
+WHEN length(customer_name)-length(replace(customer_name,' ',''))>=1 Then length(split_part(customer_name,' ',1))+1
+ELSE 0 END  as second_space_position,
+
+split_part(customer_name,' ',1) as first_name,
+CASE WHEN length(customer_name)-length(replace(customer_name,' ',''))=2 THEN split_part(customer_name,' ',2) ELSE NULL END as middle_name,
+CASE WHEN length(customer_name)-length(replace(customer_name,' ',''))=1 THEN split_part(customer_name,' ',2) 
+WHEN length(customer_name)-length(replace(customer_name,' ',''))=2 THEN split_part(customer_name,' ',3) 
+ELSE NULL END as last_name 
+from customers;
+
+
+-- Optimized Version
+
+WITH base_data AS (
+    SELECT 
+        customer_name,
+        length(customer_name) - length(replace(customer_name, ' ', '')) AS no_of_spaces,
+        split_part(customer_name, ' ', 1) AS first_name,
+        split_part(customer_name, ' ', 2) AS second_part,
+        split_part(customer_name, ' ', 3) AS third_part
+    FROM customers
+)
+SELECT 
+    customer_name,
+    no_of_spaces,
+    
+    -- First space position
+    CASE 
+        WHEN no_of_spaces >= 1 
+        THEN length(first_name) + 1
+        ELSE 0 
+    END AS first_space_position,
+    
+    -- Second space position
+    CASE 
+        WHEN no_of_spaces = 2 
+        THEN length(first_name) + length(second_part) + 2
+        WHEN no_of_spaces >= 1 
+        THEN length(first_name) + 1
+        ELSE 0 
+    END AS second_space_position,
+    
+    first_name,
+    CASE 
+        WHEN no_of_spaces = 2 
+        THEN second_part 
+        ELSE NULL 
+    END AS middle_name,
+    CASE 
+        WHEN no_of_spaces = 1 
+        THEN second_part
+        WHEN no_of_spaces = 2 
+        THEN third_part
+        ELSE NULL 
+    END AS last_name
+FROM base_data;
