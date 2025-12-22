@@ -1,0 +1,57 @@
+/*
+Determine the user IDs and corresponding page IDs of the pages liked by their friend but not by the user itself yet.
+
+*/
+
+CREATE TABLE friends (
+    user_id INT,
+    friend_id INT
+);
+
+-- Insert data into friends table
+INSERT INTO friends VALUES
+(1, 2),
+(1, 3),
+(1, 4),
+(2, 1),
+(3, 1),
+(3, 4),
+(4, 1),
+(4, 3);
+
+-- Create likes table
+CREATE TABLE likes (
+    user_id INT,
+    page_id CHAR(1)
+);
+
+-- Insert data into likes table
+INSERT INTO likes VALUES
+(1, 'A'),
+(1, 'B'),
+(1, 'C'),
+(2, 'A'),
+(3, 'B'),
+(3, 'C'),
+(4, 'B');
+
+select * from friends;
+select * from likes;
+-- my approach
+with friend_likes as
+(
+select a.user_id,a.friend_id,b.page_id
+from friends a 
+inner join likes b
+on a.friend_id = b.user_id
+),
+filter_users as
+(
+select f.user_id as f_user_id, f.friend_id as f_friend_id, f.page_id as f_page_id,
+u.user_id as u_user_id, u.page_id as u_page_id
+from friend_likes f 
+left join likes u 
+on f.user_id = u.user_id 
+and f.page_id = u.page_id
+)
+select distinct f_user_id as user_id, f_page_id as page_id from filter_users where u_page_id is null;
