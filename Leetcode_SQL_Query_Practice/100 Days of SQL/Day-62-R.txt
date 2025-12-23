@@ -1,0 +1,41 @@
+create table numbers (n int);
+insert into numbers values (1),(2),(3),(4),(5);
+insert into numbers values (9);
+
+select * from numbers;
+
+
+with recursive cte 
+as
+(
+select max(n) as n from numbers
+union all
+select n-1 from cte where n>1
+)
+select a.n as n_1,b.n as n_2
+from cte a 
+inner join cte b 
+on b.n<=a.n 
+inner join numbers c on
+a.n=c.n
+order by a.n,b.n;
+
+
+-- Second method without using recursive cte
+with cte as
+(
+select row_number() over(order by null) as n 
+from information_schema.columns
+),
+limited_rows as
+(
+select * from cte where n<=(select max(n) from numbers)
+)
+select a.n as n_1,b.n as n_2
+from limited_rows a 
+inner join limited_rows b 
+on b.n<=a.n 
+inner join numbers c on
+a.n=c.n
+order by a.n,b.n;
+
