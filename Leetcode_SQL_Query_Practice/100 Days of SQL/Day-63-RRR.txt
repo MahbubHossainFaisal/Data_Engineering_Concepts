@@ -1,0 +1,71 @@
+--remove duplicate in case of source,destination, distance are same and keep the first value only
+
+CREATE TABLE city_distance
+(
+    distance INT,
+    source VARCHAR(512),
+    destination VARCHAR(512)
+);
+
+delete from city_distance;
+INSERT INTO city_distance(distance, source, destination) VALUES ('100', 'New Delhi', 'Panipat');
+INSERT INTO city_distance(distance, source, destination) VALUES ('200', 'Ambala', 'New Delhi');
+INSERT INTO city_distance(distance, source, destination) VALUES ('150', 'Bangalore', 'Mysore');
+INSERT INTO city_distance(distance, source, destination) VALUES ('150', 'Mysore', 'Bangalore');
+INSERT INTO city_distance(distance, source, destination) VALUES ('250', 'Mumbai', 'Pune');
+INSERT INTO city_distance(distance, source, destination) VALUES ('250', 'Pune', 'Mumbai');
+INSERT INTO city_distance(distance, source, destination) VALUES ('2500', 'Chennai', 'Bhopal');
+INSERT INTO city_distance(distance, source, destination) VALUES ('2500', 'Bhopal', 'Chennai');
+INSERT INTO city_distance(distance, source, destination) VALUES ('60', 'Tirupati', 'Tirumala');
+INSERT INTO city_distance(distance, source, destination) VALUES ('80', 'Tirumala', 'Tirupati');
+
+-- First method using join
+
+select distance,source,destination
+from city_distance
+where (distance,source,destination) not in(
+select b.distance as distance, b.source as source,b.destination as destination
+from city_distance a 
+inner join city_distance b 
+on a.distance = b.distance
+where a.distance = b.distance and
+a.source = b.destination
+and a.destination = b.source
+and a.source<a.destination
+);
+
+
+-- second method using case statement
+
+with cte as
+(
+select distance, case when source<destination then source else destination end as city1,
+case when source<destination then destination else source end as city2
+from city_distance
+)
+select distance,city1 as source, city2 as destination
+from cte
+group by distance,source,destination;
+
+-- Third method to keep the source order intact
+with cte AS
+(
+select *,row_number() over(order by null) as rn from city_distance
+),
+cte2 AS (
+  SELECT
+    a.source      AS a_source,
+    a.destination AS a_destination,
+    a.distance    AS a_distance,
+    a.rn as a_rn,
+    b.source      AS b_source,
+    b.destination AS b_destination,
+    b.distance    AS b_distance,
+    b.rn as b_rn
+  FROM cte a
+  LEFT JOIN cte b
+    ON a.source = b.destination
+   AND a.destination = b.source
+)
+SELECT a_distance as distance, a_source as source, a_destination as destination
+FROM cte2 where b_distance is null or a_rn<b_rn or a_distance <> b_distance;
