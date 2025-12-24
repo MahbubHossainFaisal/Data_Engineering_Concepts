@@ -1,0 +1,79 @@
+/*
+
+Money invested in losing options (A, B, D) should be proportionately distributed among users who invested in the winning option (C).
+For example:
+
+Total money invested in A, B, D = ₹1500
+There are 3 users who invested ₹500 in C (with amounts 250, 200, and 50)
+These users should receive ₹1500 distributed proportionally:
+
+User1: ₹750
+User2: ₹600
+User3: ₹150
+(Sum = ₹1500)
+*/
+
+
+create table polls
+(
+user_id varchar(4),
+poll_id varchar(3),
+poll_option_id varchar(3),
+amount int,
+created_date date
+);
+-- Insert sample data into the investments table
+INSERT INTO polls (user_id, poll_id, poll_option_id, amount, created_date) VALUES
+('id1', 'p1', 'A', 200, '2021-12-01'),
+('id2', 'p1', 'C', 250, '2021-12-01'),
+('id3', 'p1', 'A', 200, '2021-12-01'),
+('id4', 'p1', 'B', 500, '2021-12-01'),
+('id5', 'p1', 'C', 50, '2021-12-01'),
+('id6', 'p1', 'D', 500, '2021-12-01'),
+('id7', 'p1', 'C', 200, '2021-12-01'),
+('id8', 'p1', 'A', 100, '2021-12-01'),
+('id9', 'p2', 'A', 300, '2023-01-10'),
+('id10', 'p2', 'C', 400, '2023-01-11'),
+('id11', 'p2', 'B', 250, '2023-01-12'),
+('id12', 'p2', 'D', 600, '2023-01-13'),
+('id13', 'p2', 'C', 150, '2023-01-14'),
+('id14', 'p2', 'A', 100, '2023-01-15'),
+('id15', 'p2', 'C', 200, '2023-01-16');
+
+create table poll_answers
+(
+poll_id varchar(3),
+correct_option_id varchar(3)
+);
+-- Insert sample data into the poll_answers table
+INSERT INTO poll_answers (poll_id, correct_option_id) VALUES
+('p1', 'C'),('p2', 'A');
+
+select * from polls;
+select * from poll_answers;
+
+
+with loosers_portion as
+(
+select distinct b.poll_id,sum(a.amount) over(partition by a.poll_id) as total_amount
+from  polls a
+inner join poll_answers b
+on a.poll_id = b.poll_id
+where a.poll_option_id <> b.correct_option_id
+),
+winners_portion as
+(
+select a.poll_id,a.user_id,a.amount,sum(a.amount) over(partition by a.poll_id) as total_amount,amount*1.0/sum(a.amount) over(partition by a.poll_id)  as proportion,
+b.correct_option_id
+from  polls a
+inner join poll_answers b
+on a.poll_id = b.poll_id
+where a.poll_option_id = b.correct_option_id
+)
+select a.poll_id, a.user_id, a.proportion, b.poll_id, b.total_amount as amount_tobe_distributed,
+proportion*b.total_amount as winning_amount
+from winners_portion a 
+inner join loosers_portion b 
+on
+a.poll_id = b.poll_id
+order by a.poll_id,regexp_replace(user_id, '.*?(\d+)$', '\1')::int;
