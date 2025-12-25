@@ -1,0 +1,64 @@
+-- Section 72
+
+CREATE TABLE transactions (
+    transaction_id INT PRIMARY KEY,
+    customer_id INT,
+    amount INT,
+    tran_Date timestamp
+);
+
+delete from Transactions;
+INSERT INTO Transactions VALUES (1, 101, 500, '2025-01-01 10:00:01');
+INSERT INTO Transactions VALUES (2, 201, 500, '2025-01-01 10:00:01');
+INSERT INTO Transactions VALUES (3, 102, 300, '2025-01-02 00:50:01');
+INSERT INTO Transactions VALUES (4, 202, 300, '2025-01-02 00:50:01');
+INSERT INTO Transactions VALUES (5, 101, 700, '2025-01-03 06:00:01');
+INSERT INTO Transactions VALUES (6, 202, 700, '2025-01-03 06:00:01');
+INSERT INTO Transactions VALUES (7, 103, 200, '2025-01-04 03:00:01');
+INSERT INTO Transactions VALUES (8, 203, 200, '2025-01-04 03:00:01');
+INSERT INTO Transactions VALUES (9, 101, 400, '2025-01-05 00:10:01');
+INSERT INTO Transactions VALUES (10, 201, 400, '2025-01-05 00:10:01');
+INSERT INTO Transactions VALUES (11, 101, 500, '2025-01-07 10:10:01');
+INSERT INTO Transactions VALUES (12, 201, 500, '2025-01-07 10:10:01');
+INSERT INTO Transactions VALUES (13, 102, 200, '2025-01-03 10:50:01');
+INSERT INTO Transactions VALUES (14, 202, 200, '2025-01-03 10:50:01');
+INSERT INTO Transactions VALUES (15, 103, 500, '2025-01-01 11:00:01');
+INSERT INTO Transactions VALUES (16, 101, 500, '2025-01-01 11:00:01');
+INSERT INTO Transactions VALUES (17, 203, 200, '2025-11-01 11:00:01');
+INSERT INTO Transactions VALUES (18, 201, 200, '2025-11-01 11:00:01');
+
+--ODD ids are sellers
+-- Even ids are buyers
+
+with cte as
+(
+select a.customer_id as seller_id,b.customer_id as buyer_id,b.amount
+from Transactions a 
+inner join Transactions b 
+on a.transaction_id = b.transaction_id-1
+where a.transaction_id%2 <> 0 and b.transaction_id%2=0
+)
+select seller_id, buyer_id,count(*) as transaction_number 
+from cte 
+where seller_id not in (select distinct buyer_id from cte)
+and buyer_id not in (select distinct seller_id from cte)
+group by seller_id, buyer_id;
+
+
+/*
+with sellers as
+(
+select * from transactions 
+where transaction_id%2<>0
+),
+buyers as 
+(
+select * from transactions
+where transaction_id%2 = 0
+)
+select a.transaction_id as seller_transaction_id, a.customer_id as seller_id, b.transaction_id as buyer_transaction_id, b.customer_id as buyer_id,
+b.amount as amount
+from sellers a 
+inner join buyers b 
+on a.transaction_id = b.transaction_id-1
+*/
