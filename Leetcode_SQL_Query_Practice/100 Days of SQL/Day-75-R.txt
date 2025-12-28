@@ -1,0 +1,36 @@
+-- Find the total number of people present in the hospital
+
+
+create table hospital ( emp_id int
+, action varchar(10)
+, time timestamp);
+
+insert into hospital values ('1', 'in', '2019-12-22 09:00:00');
+insert into hospital values ('1', 'out', '2019-12-22 09:15:00');
+insert into hospital values ('2', 'in', '2019-12-22 09:00:00');
+insert into hospital values ('2', 'out', '2019-12-22 09:15:00');
+insert into hospital values ('2', 'in', '2019-12-22 09:30:00');
+insert into hospital values ('3', 'out', '2019-12-22 09:00:00');
+insert into hospital values ('3', 'in', '2019-12-22 09:15:00');
+insert into hospital values ('3', 'out', '2019-12-22 09:30:00');
+insert into hospital values ('3', 'in', '2019-12-22 09:45:00');
+insert into hospital values ('4', 'in', '2019-12-22 09:45:00');
+insert into hospital values ('5', 'out', '2019-12-22 09:40:00');
+
+select * from hospital;
+
+
+WITH latest_ins_outs AS (
+    SELECT emp_id, MAX(case when action = 'in' then time end) AS latest_in_time,
+    MAX(case when action = 'out' then time end) AS latest_out_time
+    FROM hospital
+    GROUP BY emp_id
+)
+SELECT 
+    emp_id,
+    latest_in_time,
+    latest_out_time
+FROM latest_ins_outs 
+WHERE latest_out_time IS NULL  
+   OR latest_in_time > latest_out_time
+   order by emp_id; 
