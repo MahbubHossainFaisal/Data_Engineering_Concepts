@@ -31,19 +31,15 @@ WHERE EXTRACT(ISODOW FROM date_val) IN (6, 7);
 
 
 WITH holiday_info AS (
-    SELECT * 
-    FROM tickets
-    LEFT JOIN holidays
-        ON holiday_date BETWEEN create_date AND resolved_date
-),
-holiday_counts AS (
-    SELECT 
-        ticket_id,
+    SELECT  ticket_id,
         create_date,
         resolved_date,
         COUNT(holiday_date) AS no_of_holidays  
-    FROM holiday_info
+    FROM tickets
+    LEFT JOIN holidays
+        ON holiday_date BETWEEN create_date AND resolved_date
     GROUP BY ticket_id, create_date, resolved_date
+    order by ticket_id
 )
 SELECT 
     *,
@@ -52,5 +48,5 @@ SELECT
      FROM generate_series(create_date, resolved_date, '1 day'::INTERVAL) AS date_val
      WHERE EXTRACT(ISODOW FROM date_val) IN (6, 7)
     ) as business_days
-FROM holiday_counts
+FROM holiday_info
 ORDER BY ticket_id;
