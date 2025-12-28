@@ -1,0 +1,56 @@
+/*
+Write a SQL to find business days between create date and resolved date by excluding weekends and public holidays.
+*/
+
+
+create table tickets
+(
+ticket_id varchar(10),
+create_date date,
+resolved_date date
+);
+delete from tickets;
+insert into tickets values
+(1,'2022-08-01','2022-08-03')
+,(2,'2022-08-01','2022-08-12')
+,(3,'2022-08-01','2022-08-16');
+create table holidays
+(
+holiday_date date
+,reason varchar(100)
+);
+delete from holidays;
+insert into holidays values
+('2022-08-11','Rakhi'),('2022-08-15','Independence day');
+
+
+-- How to extract weekends 
+SELECT date_val::DATE AS weekend_date
+FROM generate_series('2022-08-01'::DATE, '2022-08-12'::DATE, '1 day'::INTERVAL) AS date_val
+WHERE EXTRACT(ISODOW FROM date_val) IN (6, 7);
+
+
+WITH holiday_info AS (
+    SELECT * 
+    FROM tickets
+    LEFT JOIN holidays
+        ON holiday_date BETWEEN create_date AND resolved_date
+),
+holiday_counts AS (
+    SELECT 
+        ticket_id,
+        create_date,
+        resolved_date,
+        COUNT(holiday_date) AS no_of_holidays  
+    FROM holiday_info
+    GROUP BY ticket_id, create_date, resolved_date
+)
+SELECT 
+    *,
+    resolved_date - create_date as actual_days,
+    (resolved_date - create_date) - no_of_holidays - (SELECT COUNT(*)
+     FROM generate_series(create_date, resolved_date, '1 day'::INTERVAL) AS date_val
+     WHERE EXTRACT(ISODOW FROM date_val) IN (6, 7)
+    ) as business_days
+FROM holiday_counts
+ORDER BY ticket_id;
