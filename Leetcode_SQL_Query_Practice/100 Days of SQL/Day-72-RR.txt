@@ -1,0 +1,100 @@
+/*
+
+A passenger wants to travel from New York to Tokyo in the shortest possible time.
+The passenger can start at any airport in New York and must finish their journey at any airport in Tokyo.
+They can change planes at most once.
+A plane change is possible if the first flight ends no later than the start time of the second flight.
+Note that it is possible to change planes if the end time of the first flight is equal to the start time of the second flight.
+The second flight must start from the airport at which the first flight ended.
+Write an SQL query that finds the shortest time in which this journey can occur.
+Return the difference between the time of departure from New York and the time of arrival in Tokyo in minutes.
+If such a journey is impossible, return NULL.
+*/
+
+CREATE TABLE airports (
+    port_code VARCHAR(10) PRIMARY KEY,
+    city_name VARCHAR(100)
+);
+
+CREATE TABLE flights (
+    flight_id varchar (10),
+    start_port VARCHAR(10),
+    end_port VARCHAR(10),
+    start_time timestamp,
+    end_time timestamp
+);
+
+delete from airports;
+INSERT INTO airports (port_code, city_name) VALUES
+('JFK', 'New York'),
+('LGA', 'New York'),
+('EWR', 'New York'),
+('LAX', 'Los Angeles'),
+('ORD', 'Chicago'),
+('SFO', 'San Francisco'),
+('HND', 'Tokyo'),
+('NRT', 'Tokyo'),
+('KIX', 'Osaka');
+
+delete from flights;
+INSERT INTO flights VALUES
+(1, 'JFK', 'HND', '2025-06-15 06:00', '2025-06-15 18:00'),
+(2, 'JFK', 'LAX', '2025-06-15 07:00', '2025-06-15 10:00'),
+(3, 'LAX', 'NRT', '2025-06-15 10:00', '2025-06-15 22:00'),
+(4, 'JFK', 'LAX', '2025-06-15 08:00', '2025-06-15 11:00'),
+(5, 'LAX', 'KIX', '2025-06-15 11:30', '2025-06-15 22:00'),
+(6, 'LGA', 'ORD', '2025-06-15 09:00', '2025-06-15 12:00'),
+(7, 'ORD', 'HND', '2025-06-15 11:30', '2025-06-15 23:30'),
+(8, 'EWR', 'SFO', '2025-06-15 09:00', '2025-06-15 12:00'),
+(9, 'LAX', 'HND', '2025-06-15 13:00', '2025-06-15 23:00'),
+(10, 'KIX', 'NRT', '2025-06-15 08:00', '2025-06-15 10:00');
+
+select * from airports;
+select * from flights;
+
+-- My solution 
+
+with city_info as
+(
+select a.flight_id,b.city_name as start_port, c.city_name as end_port,a.start_time,a.end_time
+from flights a 
+inner join airports b 
+on a.start_port = b.port_code 
+inner join airports c 
+on a.end_port = c.port_code
+),
+starting_flight as
+(
+select * from city_info where start_port='New York'
+order by flight_id
+),
+cte3 as
+(
+select sf.flight_id as starting_flight_id,sf.start_port as starting_port,sf.end_port as mid_port,
+sf.start_time as starting_port_start_time, sf.end_time as starting_port_end_time,
+ci.flight_id as mid_flight_id,
+ci.end_port as end_port,
+ci.start_time as mid_port_start_time, ci.end_time as mid_port_end_time,
+(EXTRACT(EPOCH FROM 
+    ((sf.end_time - sf.start_time) + 
+     (CASE WHEN ci.end_time IS NULL THEN INTERVAL '0 minutes'  
+           ELSE ci.end_time - ci.start_time 
+      END))
+) / 60):: int AS total_end_time
+from starting_flight sf 
+left join city_info ci 
+on sf.end_port = ci.start_port
+order by sf.flight_id
+),
+cte4 as
+(
+
+select starting_port as trip_start_city, case when end_port is null then null else mid_port end as middle_city,
+case when end_port is null then mid_port else end_port end as trip_end_city , 
+case when starting_flight_id is null then mid_flight_id when mid_flight_id is null then starting_flight_id else starting_flight_id || ';' || mid_flight_id end
+as flight_id,
+total_end_time
+from cte3 where mid_port_start_time>=starting_port_end_time or mid_port_start_time is null
+)
+select * from cte4 where trip_end_city = 'Tokyo';
+
