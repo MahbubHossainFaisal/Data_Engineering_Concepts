@@ -1,0 +1,76 @@
+/*
+
+Write a query to print highest and lowest salary employee in each department.
+*/
+
+
+create table employee 
+(
+emp_name varchar(10),
+dep_id int,
+salary int
+);
+delete from employee;
+insert into employee values 
+('Siva',1,30000),('Ravi',2,40000),('Prasad',1,50000),('Sai',2,20000);
+
+
+with salary as
+(
+select dep_id, min(salary) as minimum_sal, max(salary) as maximum_sal
+from employee
+group by dep_id
+),
+emp_with_max_sal as
+(
+select e.dep_id,e.emp_name as emp_name_max_salary from employee e 
+inner join salary s
+on e.dep_id = s.dep_id
+and e.salary = s.maximum_sal
+),
+emp_with_min_sal as
+(
+select e.dep_id, e.emp_name as emp_name_min_salary from employee e 
+inner join salary s
+on e.dep_id = s.dep_id
+and e.salary = s.minimum_sal
+)
+select a.dep_id, emp_name_max_salary,emp_name_min_salary
+from emp_with_max_sal a 
+inner join 
+emp_with_min_sal b 
+on a.dep_id = b.dep_id
+order by a.dep_id;
+
+
+-- More optimized solution with lesser CTEs 
+with salary as
+(
+select dep_id, min(salary) as minimum_sal, max(salary) as maximum_sal
+from employee
+group by dep_id
+)
+select e.dep_id,
+max(case when salary = maximum_sal then emp_name else NULL end) as emp_name_max_salary,
+max(case when salary = minimum_sal then emp_name else null end) as emp_name_min_salary
+from employee e 
+inner join 
+salary s 
+on e.dep_id = s.dep_id
+group by e.dep_id
+order by e.dep_id;
+
+
+-- Using window functions
+with cte as
+(
+select dep_id, emp_name,salary, 
+row_number() over(partition by dep_id order by salary desc) as max_sal_rnk,
+row_number() over(partition by dep_id order by salary) as min_salary_rnk
+from employee
+)
+select dep_id,max(case when max_sal_rnk = 1 then emp_name else null end) as emp_name_max_salary,
+max(case when min_salary_rnk = 1 then emp_name else null end) as emp_name_min_salary
+from cte
+group by dep_id;
+
