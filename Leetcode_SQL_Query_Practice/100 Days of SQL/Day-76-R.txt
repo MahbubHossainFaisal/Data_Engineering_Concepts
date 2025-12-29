@@ -1,0 +1,28 @@
+create table airbnb_searches 
+(
+user_id int,
+date_searched date,
+filter_room_types varchar(200)
+);
+delete from airbnb_searches;
+insert into airbnb_searches values
+(1,'2022-01-01','entire home,private room')
+,(2,'2022-01-02','entire home,shared room')
+,(3,'2022-01-02','private room,shared room')
+,(4,'2022-01-03','private room')
+;
+with cte as
+(
+select user_id,unnest(string_to_array(filter_room_types,',')) as individual_room_types from airbnb_searches
+
+)
+select individual_room_types as value, count(*) as cnt 
+from cte 
+group by individual_room_types;
+
+-- How to get specific elements
+with cte2 as
+(
+select user_id,string_to_array(filter_room_types,',') as individual_room_types from airbnb_searches
+)
+SELECT individual_room_types[1] AS individual_data from cte2;
