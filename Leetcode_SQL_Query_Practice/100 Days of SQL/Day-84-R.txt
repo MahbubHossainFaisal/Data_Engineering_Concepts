@@ -1,0 +1,23 @@
+/* Section 87
+*/
+create table source(id int, name varchar(5));
+
+create table target(id int, name varchar(5));
+
+insert into source values(1,'A'),(2,'B'),(3,'C'),(4,'D');
+
+insert into target values(1,'A'),(2,'B'),(4,'X'),(5,'F');
+
+select * from source;
+select * from target;
+
+with cte as
+(
+SELECT s.id as source_id, s.name as source_Name, t.id as target_id, t.name as target_name
+FROM source s
+FULL OUTER JOIN target t
+ON s.id = t.id
+)
+select case when source_id is null then target_id when target_id is null then source_id else source_id end as id,
+case when source_id is null then 'new_in_target' when target_id is null then 'new_in_source' else 'mismatch' end as comment
+from cte where source_id is null or target_id is null or (source_id=target_id and source_name<>target_name);
