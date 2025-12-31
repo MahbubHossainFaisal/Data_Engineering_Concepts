@@ -1,0 +1,23 @@
+/* Section 84
+*/
+create table company_revenue 
+(
+company varchar(100),
+year int,
+revenue int
+);
+
+insert into company_revenue values 
+('ABC1',2000,100),('ABC1',2001,110),('ABC1',2002,120),('ABC2',2000,100),('ABC2',2001,90),('ABC2',2002,120)
+,('ABC3',2000,500),('ABC3',2001,400),('ABC3',2002,600),('ABC3',2003,800);
+
+with cte as
+(
+select *,lead(revenue,1) over(partition by company order by year) as next_yr_revenue ,
+CASE when lead(revenue,1) over(partition by company order by year) > revenue or lead(revenue,1) over(partition by company order by year) is null
+then 1 else 0 end as inc_flag from company_revenue
+)
+select company,count(*) as cnt,count(*) as sales_inc_years
+from cte 
+group by company
+having sum(inc_flag) = count(*);
