@@ -22,3 +22,14 @@ from seats a
 left join seats b 
 on case when a.id%2 <> 0 then a.id+1 = b.id
 else a.id-1 = b.id end;
+
+-- using lead lag 
+
+select * from seats;
+with cte as
+(
+select *, case when id%2 <> 0 then lead(id,1,id) over(order by null) else lag(id,1) over(order by null) end as reverse_id
+from seats
+)
+select reverse_id,student from cte
+order by reverse_id;
