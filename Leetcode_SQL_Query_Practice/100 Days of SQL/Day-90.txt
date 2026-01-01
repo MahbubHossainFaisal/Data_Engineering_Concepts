@@ -1,0 +1,24 @@
+/* Section 93
+
+Write a solution to swap the seat id of every two consecutive students. If the number of students is odd, the id of the last student is not swapped.
+*/
+
+CREATE TABLE seats (
+    id INT,
+    student VARCHAR(10)
+);
+
+INSERT INTO seats VALUES 
+(1, 'Amit'),
+(2, 'Deepa'),
+(3, 'Rohit'),
+(4, 'Anjali'),
+(5, 'Neha'),
+(6, 'Sanjay'),
+(7, 'Priya');
+
+select a.id, case when b.student is null then a.student else b.student end as student
+from seats a 
+left join seats b 
+on case when a.id%2 <> 0 then a.id+1 = b.id
+else a.id-1 = b.id end;
