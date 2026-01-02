@@ -1,0 +1,78 @@
+-- section 96 
+/*
+
+You are given an employee table containing employee names and the city they live in.
+
+Each employee belongs to exactly one city, and multiple employees may belong to the same city.
+
+The company wants to create teams from these employees based on the rules below.
+
+📂 Table Given
+
+CREATE TABLE emp_details (
+	emp_name VARCHAR(10),
+	city VARCHAR(15)
+);
+🎯 Team Formation Rules
+
+All members of a team must belong to the same city
+
+Each team can have at most 3 employees
+
+Teams are formed in the order employees appear in the table
+
+Keep forming teams of exactly 3 until fewer than 3 employees remain
+
+If fewer than 3 employees remain in a city, they form one final team
+
+Each team must have:
+
+City name
+
+A comma-separated, alphabetically ordered list of employee names
+
+A team name in the format Team 1, Team 2, …
+
+Cities must appear in alphabetical order
+
+Team numbering is global, not per city
+
+*/
+
+-- I am astonished that I have done the solution by myself just take the help of how to group by 3 rows.
+
+
+-- Create the table
+CREATE TABLE emp_details (
+    emp_name VARCHAR(10),
+    city VARCHAR(15)
+);
+
+-- Insert sample data
+INSERT INTO emp_details (emp_name, city) VALUES
+('Sam', 'New York'),
+('David', 'New York'),
+('Peter', 'New York'),
+('Chris', 'New York'),
+('John', 'New York'),
+('Steve', 'San Francisco'),
+('Rachel', 'San Francisco'),
+('Robert', 'Los Angeles');
+
+with cte as 
+(
+select *,row_number() over(order by null) as row_id from emp_details
+),
+cte2 as
+(
+SELECT 
+    *, 
+    ROW_NUMBER() OVER (PARTITION BY city ORDER BY row_id) AS rn 
+FROM cte
+)
+select *, 'Team' || row_number() over(order by null) as team_name
+from 
+(
+select  city, string_agg(emp_name,',' order by emp_name) as names from cte2 
+group by city,(rn-1)/3
+ORDER BY CITY) A;
