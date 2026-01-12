@@ -23,3 +23,27 @@ def bubble_sort(arr,n,i):
 ans = bubble_sort([18,22,2,21,5,15,16],7,0)
 
 print(ans)
+
+
+# Increasing i by 1 method.
+
+# Increasing i by 1 method.
+
+def sort_rec(arr,n,i,j):
+  if j>n-i-1:
+    return
+  if arr[j-1]>arr[j]:
+    arr[j-1],arr[j] = arr[j],arr[j-1]
+  sort_rec(arr,n,i,j+1)
+
+def bubble_sort(arr,n,i):
+  if n == i:
+    return arr 
+    
+  sort_rec(arr,n,i,1)
+  return bubble_sort(arr,n,i+1)
+  
+
+ans = bubble_sort([33,12,3,11,1,5],6,0)
+
+print(ans)
