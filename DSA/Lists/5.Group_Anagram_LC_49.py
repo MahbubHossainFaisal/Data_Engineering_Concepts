@@ -23,3 +23,25 @@ class Solution:
             main_list.append(temp_list)
 
         return main_list
+
+
+# Solution 2
+# Time Complexity: O(n · k)
+# Space Complexity: O(n)
+
+class Solution:
+    def groupAnagrams(self, strs: List[str]) -> List[List[str]]:
+        library={}
+        for i in range(len(strs)):
+            sentence=[0]*26
+            for j in range(len(strs[i])):
+                char_index = ord(strs[i][j])-ord('a')
+                sentence[char_index]+=1
+            key= tuple(sentence)
+            if key not in library:
+                library[key]=[]
+            library[(key)].append(strs[i])
+
+        
+        
+        return list(library.values())
