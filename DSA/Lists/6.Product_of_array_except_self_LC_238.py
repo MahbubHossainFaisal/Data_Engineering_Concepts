@@ -54,9 +54,7 @@ class Solution:
         temp_val = 1
         for i in range(len(nums)-2,-1,-1):
             temp_val = temp_val*nums[i+1]
-            if i==1:
-              prefix[i]=temp_val
-              continue
+            
             prefix[i] = prefix[i]*temp_val
             
             
@@ -64,4 +62,3 @@ class Solution:
 
         return prefix
                 
-# Currently failed in 16th test case
