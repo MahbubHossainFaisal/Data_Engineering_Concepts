@@ -1,0 +1,9 @@
+customer_id,name,email,signup_date,is_active
+501,John Doe,john@gmail.com,2023-11-01,Y
+502,,mary@gmail.com,2023/11/05,Y
+503,Alex,alexgmail.com,2023-15-11,N
+504,Rahul,rahul@gmail.com,,Y
+505,Amit,amit@gmail.com,2023-11-10,
+506,"Priya Sharma",priya@gmail.com,2023-11-11,Y
+507,"Sam, Wilson",sam@gmail.com,2023-11-12,Y
+508,Ravi,ravi@gmail,2023-11-13,Y

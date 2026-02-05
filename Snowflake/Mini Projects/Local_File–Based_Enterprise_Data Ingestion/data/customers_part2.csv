@@ -1,0 +1,5 @@
+email,customer_id,signup_date,name,is_active
+john@gmail.com,501,2023-11-01,John Doe,Y
+sam@gmail.com,509,2023-11-10,Sam,Y
+rahul@gmail.com,504,2023-11-05,Rahul,Y
+,510,2023-11-06,NoEmailUser,Y
