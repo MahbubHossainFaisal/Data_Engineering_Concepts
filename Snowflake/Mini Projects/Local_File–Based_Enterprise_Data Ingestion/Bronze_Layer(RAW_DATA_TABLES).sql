@@ -1,0 +1,145 @@
+CREATE DATABASE ECOM_INGESTION_DB;
+
+CREATE SCHEMA ECOM_INGESTION_DB.RAW;
+CREATE SCHEMA ECOM_INGESTION_DB.STAGING;
+CREATE SCHEMA ECOM_INGESTION_DB.CLEAN;
+CREATE SCHEMA ECOM_INGESTION_DB.FINAL;
+
+CREATE STAGE ECOM_INGESTION_DB.RAW.RAW_STAGE;
+
+LIST @ECOM_INGESTION_DB.RAW.RAW_STAGE;
+
+
+CREATE OR REPLACE FILE FORMAT ECOM_INGESTION_DB.RAW.RAW_CSV_FORMAT
+
+  TYPE = 'CSV',
+  FIELD_DELIMITER = ',',
+  PARSE_HEADER = TRUE,
+  FIELD_OPTIONALLY_ENCLOSED_BY = '"',
+  NULL_IF = ('NULL', 'null', '', 'NaN'),
+  EMPTY_FIELD_AS_NULL = TRUE,
+  TRIM_SPACE = TRUE
+  ERROR_ON_COLUMN_COUNT_MISMATCH = FALSE
+;
+
+
+-- Creating BRONZE TABLES
+CREATE OR REPLACE TABLE ECOM_INGESTION_DB.RAW.CUSTOMERS_BRONZE (
+    CUSTOMER_ID INT,
+    NAME STRING,
+    EMAIL STRING,
+    SIGNUP_DATE STRING,
+    IS_ACTIVE STRING,
+    UPLOAD_TIME TIMESTAMP DEFAULT CURRENT_TIMESTAMP()
+);
+--Since you are using MATCH_BY_COLUMN_NAME, ensure you have run this command at least once to allow the table to accept the columns from your files:
+ALTER TABLE ECOM_INGESTION_DB.RAW.CUSTOMERS_BRONZE SET ENABLE_SCHEMA_EVOLUTION = TRUE;
+
+list @ECOM_INGESTION_DB.RAW.RAW_STAGE/customers;
+
+COPY INTO ECOM_INGESTION_DB.RAW.CUSTOMERS_BRONZE
+FROM @ECOM_INGESTION_DB.RAW.RAW_STAGE
+PATTERN = '.*customers_part.*\.csv\.gz'
+FILE_FORMAT = (FORMAT_NAME = 'ECOM_INGESTION_DB.RAW.RAW_CSV_FORMAT')
+MATCH_BY_COLUMN_NAME = CASE_INSENSITIVE;
+
+SHOW FILE FORMATS IN SCHEMA ECOM_INGESTION_DB.RAW;
+
+SELECT * FROM ECOM_INGESTION_DB.RAW.CUSTOMERS_BRONZE
+
+LIST @ECOM_INGESTION_DB.RAW.RAW_STAGE;
+
+SELECT $1,$2,$3,$4,$5 FROM @ECOM_INGESTION_DB.RAW.RAW_STAGE/customers_part1.csv.gz
+(FILE_FORMAT =>  'ECOM_INGESTION_DB.RAW.RAW_CSV_FORMAT' )
+
+-- FILE_FORMAT with PARSE_HEADER = TRUE has some issue to read stage files directly. So creating another file format just to read staging files
+CREATE OR REPLACE FILE FORMAT ECOM_INGESTION_DB.RAW.READ_STAGE_FILE_FORMAT
+
+  TYPE = 'CSV',
+  FIELD_DELIMITER = ',',
+  FIELD_OPTIONALLY_ENCLOSED_BY = '"',
+  NULL_IF = ('NULL', 'null', '', 'NaN'),
+  EMPTY_FIELD_AS_NULL = TRUE,
+  TRIM_SPACE = TRUE
+;
+
+SELECT $1,$2,$3,$4,$5, $6 FROM @ECOM_INGESTION_DB.RAW.RAW_STAGE/orders_part1.csv.gz
+(FILE_FORMAT =>  'READ_STAGE_FILE_FORMAT' )
+
+SELECT $1,$2,$3,$4,$5, $6 FROM @ECOM_INGESTION_DB.RAW.RAW_STAGE/orders_part2.csv.gz
+(FILE_FORMAT =>  'READ_STAGE_FILE_FORMAT' )
+
+/*
+Create the Table using "INFER_SCHEMA"
+Instead of typing out CREATE TABLE (...) manually, ask Snowflake to scan your staged files and determine the structure for you.
+What this does: It looks at all 10+ files in the folder, finds every unique column name across all of them, and builds a table that fits the "union" of all those columns.
+*/
+
+SELECT * FROM TABLE(
+  INFER_SCHEMA(
+    LOCATION=>'@ECOM_INGESTION_DB.RAW.RAW_STAGE/', 
+    FILES=>'orders_part1.csv.gz', -- Test with ONE specific filename first
+    FILE_FORMAT=>'ECOM_INGESTION_DB.RAW.RAW_CSV_FORMAT'
+  )
+);
+-- Use INFER_SCHEMA on your first file only. This creates the starting structure.
+CREATE OR REPLACE TABLE ECOM_INGESTION_DB.RAW.ORDERS_BRONZE
+  USING TEMPLATE (
+    SELECT ARRAY_AGG(OBJECT_CONSTRUCT(*))
+    FROM TABLE(
+      INFER_SCHEMA(
+        LOCATION=>'@ECOM_INGESTION_DB.RAW.RAW_STAGE/orders_part1.csv.gz', -- Point to ONE existing file
+        FILE_FORMAT=>'ECOM_INGESTION_DB.RAW.RAW_CSV_FORMAT'
+      )
+    )
+  );
+
+/* 
+Enable Schema Evolution
+This is the "magic" step. It tells Snowflake: "If you find a new column in any of the other 10 files during the load, just add it to the table automatically."
+*/
+
+ALTER TABLE ECOM_INGESTION_DB.RAW.ORDERS_BRONZE SET ENABLE_SCHEMA_EVOLUTION = TRUE;
+
+/*
+Now, run the COPY INTO command. By using MATCH_BY_COLUMN_NAME, Snowflake will align the data correctly. If part2 has a column that part1 didn't have, Snowflake will add it to the table on the fly.
+*/
+
+COPY INTO ECOM_INGESTION_DB.RAW.ORDERS_BRONZE
+FROM @ECOM_INGESTION_DB.RAW.RAW_STAGE/
+PATTERN='.*orders_part.*\.csv\.gz' 
+FILE_FORMAT = (
+    FORMAT_NAME = 'ECOM_INGESTION_DB.RAW.RAW_CSV_FORMAT',
+    PARSE_HEADER = TRUE -- Required for column matching
+)
+MATCH_BY_COLUMN_NAME = CASE_INSENSITIVE;
+
+
+select * from orders_bronze;
+
+
+-- Ingesting PAYMENTS file to raw table now
+
+SELECT $1,$2,$3,$4,$5, $6 FROM @ECOM_INGESTION_DB.RAW.RAW_STAGE/payments.csv.gz
+(FILE_FORMAT =>  'READ_STAGE_FILE_FORMAT' )
+
+CREATE OR REPLACE TABLE ECOM_INGESTION_DB.RAW.PAYMENTS_BRONZE
+  USING TEMPLATE (
+    SELECT ARRAY_AGG(OBJECT_CONSTRUCT(*))
+    FROM TABLE(
+      INFER_SCHEMA(
+        LOCATION=>'@ECOM_INGESTION_DB.RAW.RAW_STAGE/payments.csv.gz', 
+        FILE_FORMAT=>'ECOM_INGESTION_DB.RAW.RAW_CSV_FORMAT'
+      )
+    )
+  );
+
+COPY INTO ECOM_INGESTION_DB.RAW.PAYMENTS_BRONZE
+FROM @ECOM_INGESTION_DB.RAW.RAW_STAGE/
+PATTERN='.*payments*\.csv\.gz' 
+FILE_FORMAT = (
+    FORMAT_NAME = 'ECOM_INGESTION_DB.RAW.RAW_CSV_FORMAT'
+)
+MATCH_BY_COLUMN_NAME = CASE_INSENSITIVE;
+
+select * from payments_bronze;
