@@ -21,3 +21,28 @@ class Solution:
             if count>k:
                 break
         return ans
+
+# Time complexity: O(n)
+# Space complexity: O(nlogn)
+
+import heapq
+class Solution:
+    def topKFrequent(self, nums: List[int], k: int) -> List[int]:
+        library = {
+        }
+
+        for i in range(0,len(nums)):
+            if nums[i] not in library:
+                library[nums[i]]=0
+            library[nums[i]]+=1
+        pq=[]
+        for key,val in library.items():
+            heapq.heappush(pq,(-val,key))
+        #print(pq)
+        ans=[]
+        while k!=0:
+            ans.append(pq[0][1])
+            heapq.heappop(pq)
+            k-=1
+        
+        return ans
