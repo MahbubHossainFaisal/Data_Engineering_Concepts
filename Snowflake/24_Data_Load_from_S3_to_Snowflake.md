@@ -1,49 +1,53 @@
-# Data Load from S3 to Snowflake
+# Loading Data from S3 into Snowflake
 
-> **Scenario (Retail-X):** Hourly `orders_YYYYMMDD.csv` files land in `s3://retailx-raw/orders/`. Some rows occasionally contain bad dates or non-numeric totals. The goal is to load everything that's good, capture the bad rows in a place you can fix, then re-load only the fixed rows — safely and repeatably.
+## What Is This About?
+
+When your data lives in AWS S3 as CSV files and you need to bring it into a Snowflake table, you use the `COPY INTO` command. But real-world data is messy — some rows will have bad dates, text where numbers should be, or missing values. You need a strategy to **load the good data**, **catch the bad rows**, **fix them**, and **reload only those fixed rows**.
+
+This guide walks you through the entire process, step by step, in plain English.
+
+> **Real-World Scenario:** You work at "Retail-X." Every hour, new `orders_YYYYMMDD.csv` files land in `s3://retailx-raw/orders/`. Some rows have problems — maybe a date is formatted wrong, or someone typed "N/A" in a numeric column. Your job is to get the clean data into Snowflake, capture the bad rows, fix them, and reload them — without duplicating anything.
 
 ---
 
 ## Table of Contents
 
-1. [TL;DR — One-Line Plan](#1-tldr--one-line-plan)
+1. [The Big Picture — What's the Plan?](#1-the-big-picture--whats-the-plan)
 2. [Setup — File Format, Stage & Table](#2-setup--file-format-stage--table)
-3. [Step 1 — Validate Files (Dry Run)](#3-step-1--validate-files-dry-run)
+3. [Step 1 — Check for Errors First (Without Loading Anything)](#3-step-1--check-for-errors-first-without-loading-anything)
 4. [Step 2 — Load the Good Rows](#4-step-2--load-the-good-rows)
-5. [Step 3 — Collect Error Details After Load](#5-step-3--collect-error-details-after-load)
-   - [5.1 — Error Metadata (Fast, Built-in)](#51--error-metadata-fast-built-in)
-   - [5.2 — Capture Actual Raw Rows That Failed](#52--capture-actual-raw-rows-that-failed)
-   - [5.3 — Export Bad Rows to a File](#53--export-bad-rows-to-a-file-optional)
-6. [Step 4 — Fix & Re-Load Only the Bad Rows](#6-step-4--fix--re-load-only-the-bad-rows)
-   - [Option 1 — Raw-Landing + Transform Workflow (Recommended)](#option-1--raw-landing--transform-workflow-recommended-for-production)
-   - [Option 2 — Lightweight Ad-Hoc Fix](#option-2--lightweight-ad-hoc-fix--re-stage)
-7. [Audit & Monitoring](#7-audit--monitoring)
-8. [FAQ — Quick Answers](#8-faq--quick-answers)
-9. [Recommended Production Pattern (Summary)](#9-recommended-production-pattern-summary)
+5. [Step 3 — Find Out What Went Wrong](#5-step-3--find-out-what-went-wrong)
+6. [Step 4 — Fix and Reload Only the Bad Rows](#6-step-4--fix-and-reload-only-the-bad-rows)
+7. [How to Monitor Your Loads](#7-how-to-monitor-your-loads)
+8. [Frequently Asked Questions](#8-frequently-asked-questions)
+9. [Best Practice Summary](#9-best-practice-summary)
 10. [References](#10-references)
 
 ---
 
-## 1. TL;DR — One-Line Plan
+## 1. The Big Picture — What's the Plan?
 
-| Step | Action |
-|------|--------|
-| **1** | Create file format + stage |
-| **2** | Validate files first (`VALIDATION_MODE='RETURN_ERRORS'`) to see problems |
-| **3** | Load with `ON_ERROR='CONTINUE'` to let good rows in |
-| **4** | Capture error metadata with `VALIDATE(...)` or `RESULT_SCAN(LAST_QUERY_ID())` |
-| **5** | Extract actual bad rows (using `TRY_` functions), write to an internal stage or error table, fix them, then re-load only those fixed rows |
+Here's the workflow at a high level. Every step is explained in detail below.
 
-> Detailed examples for each step follow below.
-> See: [COPY INTO \<table\> — Snowflake Documentation](https://docs.snowflake.com/en/sql-reference/sql/copy-into-table)
+| Step | What You Do | Why |
+|------|-------------|-----|
+| **1** | Create a file format, a stage, and a target table | These are the building blocks Snowflake needs to read your S3 files |
+| **2** | Validate the files first (a "dry run") | Find every error *before* loading — so you know what you're dealing with |
+| **3** | Load with `ON_ERROR = 'CONTINUE'` | This tells Snowflake: "Skip the bad rows, but load everything else" |
+| **4** | Capture the error details | Get the list of what went wrong — which rows, which files, what error |
+| **5** | Fix the bad rows and reload just those | Either fix the CSV files and re-upload them, or fix the data in SQL |
+
+> See: [COPY INTO \<table\> — Snowflake Docs](https://docs.snowflake.com/en/sql-reference/sql/copy-into-table)
 
 ---
 
 ## 2. Setup — File Format, Stage & Table
 
-Copy/paste and edit names as needed.
+Before loading any data, you need three things:
 
-### 2a. File Format for CSV
+### What Is a File Format?
+
+A **file format** tells Snowflake *how to read* your files. For a CSV file, it needs to know: What's the delimiter? Is there a header row? How should it handle NULLs? Are fields wrapped in quotes?
 
 ```sql
 CREATE OR REPLACE FILE FORMAT retailx_csv_fmt
@@ -56,9 +60,13 @@ CREATE OR REPLACE FILE FORMAT retailx_csv_fmt
   COMPRESSION     = 'AUTO';
 ```
 
-### 2b. External Stage
+**In plain English:** This says "the file is CSV, uses commas, has a header row to skip, fields might be wrapped in double quotes, trim extra spaces, and treat empty strings or the word NULL as actual NULL values."
 
-> Assumes you already created the storage integration `retailx_s3_int`.
+---
+
+### What Is a Stage?
+
+A **stage** is a pointer to where your files live. Think of it as a bookmark to your S3 location. Instead of typing the full S3 URL every time, you create a stage once and reference it by name.
 
 ```sql
 CREATE OR REPLACE STAGE retailx_orders_stage
@@ -67,7 +75,15 @@ CREATE OR REPLACE STAGE retailx_orders_stage
   FILE_FORMAT         = retailx_csv_fmt;
 ```
 
-### 2c. Target (Production) Table
+**In plain English:** "Create a stage called `retailx_orders_stage` that points to my S3 bucket, uses my storage integration for authentication, and reads files using the CSV format I defined above."
+
+> **Note:** The `retailx_s3_int` is a **Storage Integration** that handles authentication between Snowflake and AWS. If you haven't created one yet, see the setup guide from earlier lessons.
+
+---
+
+### The Target Table
+
+This is the Snowflake table where the data will end up:
 
 ```sql
 CREATE OR REPLACE TABLE retailx_orders (
@@ -78,14 +94,15 @@ CREATE OR REPLACE TABLE retailx_orders (
 );
 ```
 
-> **Note:** If you don't have `retailx_s3_int` yet, create it as a **Storage Integration** — covered in earlier lessons.
-> See: [COPY INTO \<table\> — Snowflake Documentation](https://docs.snowflake.com/en/sql-reference/sql/copy-into-table)
-
 ---
 
-## 3. Step 1 — Validate Files (Dry Run)
+## 3. Step 1 — Check for Errors First (Without Loading Anything)
 
-**Why validate first?** `VALIDATION_MODE` scans files and returns row-level error details — you learn what to fix *before* touching production tables. Use this when you want to inspect problems upfront.
+Before actually loading data, you can do a **dry run** to find all the problems upfront. Think of it like a spell-check before printing a document.
+
+### How It Works
+
+Add `VALIDATION_MODE = 'RETURN_ERRORS'` to your `COPY INTO` command. This makes Snowflake scan the files and report every row that *would* fail — without actually inserting anything into your table.
 
 ```sql
 COPY INTO retailx_orders
@@ -95,28 +112,34 @@ COPY INTO retailx_orders
   VALIDATION_MODE = 'RETURN_ERRORS';
 ```
 
-This returns a result-set listing each error (error message, file, line, column, row number).
+**What you get back:** A result set listing every error — the error message, which file it's in, which line, which column, and the row number.
 
-### Save Validation Output to an Error Table
+The `PATTERN` parameter is a regex filter — it tells Snowflake to only scan files whose names match `orders_20250828*.csv`. This is how you target specific files.
+
+---
+
+### Save the Errors to a Table
+
+The validation results are temporary — they disappear after your session ends. To keep them, save them to a table right away:
 
 ```sql
 CREATE OR REPLACE TABLE retailx_orders_validation_errors AS
 SELECT * FROM TABLE(RESULT_SCAN(LAST_QUERY_ID()));
 ```
 
-`RESULT_SCAN(LAST_QUERY_ID())` reads the result set returned by the previous `COPY ... VALIDATION_MODE` command. Use that table to inspect full error details (error text, file, row, column).
+**What's happening here?** `LAST_QUERY_ID()` grabs the ID of the query you just ran (the validation). `RESULT_SCAN()` reads the result of that query. Together, they let you capture the validation output into a permanent table you can examine at your leisure.
 
-> See: [RESULT_SCAN — Snowflake Documentation](https://docs.snowflake.com/en/sql-reference/functions/result_scan)
+> See: [RESULT_SCAN — Snowflake Docs](https://docs.snowflake.com/en/sql-reference/functions/result_scan)
 
-### Important Caveat
+### One Limitation to Know
 
-`VALIDATION_MODE` does **not** support `COPY` statements that perform SQL transformations during the load (e.g., `COPY INTO table (SELECT ...)`). If you must transform during load, use a raw landing table or ad-hoc queries — covered in the following sections.
-
-> See: [COPY INTO \<table\> — Snowflake Documentation](https://docs.snowflake.com/en/sql-reference/sql/copy-into-table)
+`VALIDATION_MODE` does **not** work if your `COPY INTO` includes SQL transformations (like `COPY INTO table FROM (SELECT ...)`). If you need to transform data during the load, you'll need to use the "raw landing table" approach described in [Step 4](#6-step-4--fix-and-reload-only-the-bad-rows).
 
 ---
 
 ## 4. Step 2 — Load the Good Rows
+
+Now it's time to actually load data. The key decision here is: **what should Snowflake do when it hits a bad row?**
 
 ```sql
 COPY INTO retailx_orders
@@ -126,52 +149,56 @@ COPY INTO retailx_orders
   ON_ERROR    = 'CONTINUE';
 ```
 
-### What Does `ON_ERROR = 'CONTINUE'` Do?
+### What Does `ON_ERROR` Do?
 
-| ON_ERROR Value | Behavior |
-|----------------|----------|
-| `ABORT_STATEMENT` *(default)* | Stops the **entire** command at the first error |
-| `SKIP_FILE` | Skips the **entire file** on the first error |
-| **`CONTINUE`** | **Skips only the bad row**, continues loading remaining rows across all files |
+This setting controls Snowflake's behavior when it encounters a row that can't be loaded (wrong data type, missing required value, etc.):
 
-Use `CONTINUE` when you want to ingest all good rows while still discovering bad ones.
+| Setting | What Snowflake Does | When to Use |
+|---------|---------------------|-------------|
+| `ABORT_STATEMENT` *(default)* | Stops **everything** at the first bad row. No data gets loaded. | When your data must be 100% clean — you'd rather load nothing than load partial data |
+| `SKIP_FILE` | Skips the **entire file** that has even one bad row. Other files still load. | When a single bad row means the whole file is suspect |
+| **`CONTINUE`** | Skips **only the bad row** and keeps loading everything else | When you want to get as much good data in as possible, and you'll deal with the bad rows separately |
 
-> See: [COPY INTO \<table\> — ON_ERROR](https://docs.snowflake.com/en/sql-reference/sql/copy-into-table)
+For our scenario, `CONTINUE` is the right choice — we want all the good orders in the table, and we'll handle the bad ones next.
 
-### After This Run You Will Have
+### What Happens After the Load?
 
-- Good rows inserted into `retailx_orders`.
-- The load result (query) reports counts of rows loaded vs. errors.
-- Metadata about the load available via `TABLE(VALIDATE(...))`, `COPY_HISTORY`, `LOAD_HISTORY`, or `LAST_QUERY_ID()`.
+After this command runs, you'll have:
 
-> See: [COPY_HISTORY — Snowflake Documentation](https://docs.snowflake.com/en/sql-reference/functions/copy_history)
+- All the **good rows** sitting in the `retailx_orders` table
+- A report showing how many rows were loaded vs. how many had errors
+- The ability to dig into the error details using `VALIDATE()` or `COPY_HISTORY`
+
+> See: [COPY_HISTORY — Snowflake Docs](https://docs.snowflake.com/en/sql-reference/functions/copy_history)
 
 ---
 
-## 5. Step 3 — Collect Error Details After Load
+## 5. Step 3 — Find Out What Went Wrong
 
-Two approaches depending on whether you want *metadata about errors* or the *actual raw rows that failed*.
+Now that the good data is loaded, you need to figure out what went wrong with the bad rows. There are two approaches, and you might use both.
 
-### 5.1 — Error Metadata (Fast, Built-in)
+### Approach A: Get the Error Messages (Quick and Easy)
 
-If you executed the `COPY` with `ON_ERROR='CONTINUE'`, capture all errors for that load run **immediately after** your COPY command:
+**Run this immediately after your COPY command** — it captures the error details for every row that failed:
 
 ```sql
 CREATE OR REPLACE TABLE retailx_orders_load_errors AS
 SELECT * FROM TABLE(VALIDATE('retailx_orders', JOB_ID => LAST_QUERY_ID()));
 ```
 
-`VALIDATE(table, JOB_ID => ...)` returns the errors encountered during the COPY job — one row per error with details (error message, file, line, column, etc.). Save it to a table for triage.
+**What this does:** The `VALIDATE()` function goes back and looks at the errors from the COPY job you just ran. It returns one row per error, including the error message, the file name, line number, and column. Saving it to a table lets you review it anytime.
 
-> See: [VALIDATE — Snowflake Documentation](https://docs.snowflake.com/en/sql-reference/functions/validate)
+Think of it like getting an error report — it tells you *why* each row failed, but it doesn't give you the actual data from the row.
+
+> See: [VALIDATE — Snowflake Docs](https://docs.snowflake.com/en/sql-reference/functions/validate)
 
 ---
 
-### 5.2 — Capture Actual Raw Rows That Failed
+### Approach B: Get the Actual Bad Rows (Better for Fixing)
 
-> **Recommended** if you want to fix and re-load only those rows.
+The error messages tell you *why* rows failed, but you also want the **actual data** from those rows so you can fix it. To do this, you query the files directly in S3 and use `TRY_` functions to find rows that would fail.
 
-`VALIDATE` / `RETURN_ERRORS` give you **error metadata**, but don't always return the exact raw CSV text in a convenient column. To get the raw problem rows, query the stage with `TRY_` functions to detect rows that would fail when cast to the target types.
+**How `TRY_` functions work:** Normally, `CAST('abc' AS INTEGER)` would throw an error. But `TRY_CAST('abc' AS INTEGER)` returns `NULL` instead. So if `TRY_CAST` returns NULL, you know that value is bad.
 
 ```sql
 CREATE OR REPLACE TABLE retailx_orders_bad_raw AS
@@ -183,57 +210,62 @@ SELECT
   METADATA$FILENAME           AS source_file,
   METADATA$FILE_ROW_NUMBER    AS source_row_num
 FROM @retailx_orders_stage (FILE_FORMAT => 'retailx_csv_fmt') t
-WHERE TRY_CAST(t.$1 AS INTEGER) IS NULL                          -- order_id not int
-   OR TRY_TO_TIMESTAMP(t.$3, 'YYYY-MM-DD HH24:MI:SS') IS NULL   -- bad date
-   OR TRY_CAST(t.$4 AS NUMBER) IS NULL;                          -- bad number
+WHERE TRY_CAST(t.$1 AS INTEGER) IS NULL                          -- order_id isn't a valid number
+   OR TRY_TO_TIMESTAMP(t.$3, 'YYYY-MM-DD HH24:MI:SS') IS NULL   -- date is in a wrong format
+   OR TRY_CAST(t.$4 AS NUMBER) IS NULL;                          -- total isn't a valid number
 ```
 
-**Key notes:**
-- When querying a stage directly, positional columns are `$1, $2, ...`.
-- `METADATA$FILENAME` and `METADATA$FILE_ROW_NUMBER` tell you exactly which file/row the problem came from.
+**What's happening in plain English:**
 
-> See: [Querying Data in Staged Files — Snowflake Documentation](https://docs.snowflake.com/en/user-guide/querying-stage)
+1. We're reading the raw CSV files directly from S3 (via the stage), treating every column as a plain string (`$1`, `$2`, `$3`, `$4` are positional columns).
+2. For each row, we try to convert the values to their expected types using `TRY_CAST` / `TRY_TO_TIMESTAMP`.
+3. If any conversion returns NULL, it means that value is bad — and we capture the whole row.
+4. `METADATA$FILENAME` and `METADATA$FILE_ROW_NUMBER` tell us exactly which file and which line the bad row came from — invaluable for debugging.
+
+> See: [Querying Staged Files — Snowflake Docs](https://docs.snowflake.com/en/user-guide/querying-stage)
 
 ---
 
-### 5.3 — Export Bad Rows to a File (Optional)
+### (Optional) Export the Bad Rows to a File
 
-If you prefer to fix rows offline or hand them to a data-fixer team, write them to an internal stage:
+If you want to send the bad rows to someone else to fix (or fix them in Excel), you can export them to an internal stage:
 
 ```sql
--- Create a named internal stage for error files
+-- Create an internal stage to hold error files
 CREATE OR REPLACE STAGE retailx_error_stage;
 
--- Unload the bad rows to files in that internal stage
+-- Export the bad rows as a CSV
 COPY INTO @retailx_error_stage/errors_
 FROM ( SELECT * FROM retailx_orders_bad_raw )
 FILE_FORMAT = (TYPE = CSV  FIELD_DELIMITER = ','  HEADER = TRUE);
 ```
 
-Now you can `GET` these files from the internal stage, hand-fix them, re-stage them (to S3 or to the internal stage), and load them separately.
+You can then download these files using the `GET` command, fix the data, re-upload the corrected file, and load just that file.
 
-> See: [COPY INTO \<location\> — Snowflake Documentation](https://docs.snowflake.com/en/sql-reference/sql/copy-into-location)
+> See: [COPY INTO \<location\> — Snowflake Docs](https://docs.snowflake.com/en/sql-reference/sql/copy-into-location)
 
 ---
 
-## 6. Step 4 — Fix & Re-Load Only the Bad Rows
+## 6. Step 4 — Fix and Reload Only the Bad Rows
 
-Pick one of these two approaches based on scale and automation needs.
+Now you have the bad rows identified. How do you fix them and get them into the production table? Here are two approaches.
 
-### Option 1 — Raw-Landing + Transform Workflow (Recommended for Production)
+### Option 1: The "Raw Landing Table" Approach (Best for Production)
 
-This is the most robust pattern: no duplicate risk, easy reprocessing, easier to automate, and you keep raw immutable data for replay.
+This is the most reliable method. The idea is simple:
 
-**Step A — Load everything into a raw table with a loose schema** (all `VARCHAR`) so the COPY never fails due to type mismatch:
+**Instead of loading directly into the production table (which has strict types like INTEGER and TIMESTAMP), load everything into a "raw" table where every column is just a STRING.** This way, the COPY command *never* fails — even bad data loads successfully as text. Then you use SQL to sort the good from the bad.
+
+**Step A — Load everything as raw strings:**
 
 ```sql
 CREATE OR REPLACE TABLE raw_orders_rawcols (
   src_file        STRING,
   file_row_number NUMBER,
-  col1 STRING,
-  col2 STRING,
-  col3 STRING,
-  col4 STRING,
+  col1 STRING,    -- will become order_id
+  col2 STRING,    -- will become customer_id
+  col3 STRING,    -- will become created_at
+  col4 STRING,    -- will become total_usd
   ingested_at     TIMESTAMP_NTZ DEFAULT CURRENT_TIMESTAMP()
 );
 
@@ -243,10 +275,12 @@ COPY INTO raw_orders_rawcols
   ON_ERROR    = 'CONTINUE';
 ```
 
-**Step B — Use SQL with `TRY_` functions** to validate/clean rows. Insert clean rows into the production table and write unfixable rows into an error table for manual remediation:
+Since every column is a STRING, almost nothing will fail. Now all your data — good and bad — is in Snowflake.
+
+**Step B — Separate the good rows from the bad ones using SQL:**
 
 ```sql
--- Insert clean rows
+-- Move clean rows to the production table
 INSERT INTO retailx_orders
 SELECT
   TRY_CAST(col1 AS INTEGER),
@@ -257,8 +291,12 @@ FROM raw_orders_rawcols
 WHERE TRY_CAST(col1 AS INTEGER) IS NOT NULL
   AND TRY_TO_TIMESTAMP(col3, 'YYYY-MM-DD HH24:MI:SS') IS NOT NULL
   AND TRY_CAST(col4 AS NUMBER) IS NOT NULL;
+```
 
--- Capture unfixable rows
+**What this does:** It tries to convert each column to its proper type. The `WHERE` clause keeps only rows where *all* conversions succeeded — those are your clean rows.
+
+```sql
+-- Capture the bad rows into an error table for manual review
 CREATE OR REPLACE TABLE retailx_orders_error AS
 SELECT * FROM raw_orders_rawcols
 WHERE NOT (
@@ -268,14 +306,24 @@ WHERE NOT (
 );
 ```
 
+**What this does:** The opposite — it keeps rows where *at least one* conversion failed. These are the rows that need human attention.
+
+**Why this approach is recommended:**
+- No risk of duplicates — you control exactly what goes into the production table
+- Easy to reprocess — just re-run the INSERT from the raw table
+- You keep the original raw data for auditing
+- Easy to automate with stored procedures
+
 ---
 
-### Option 2 — Lightweight Ad-Hoc Fix & Re-Stage
+### Option 2: Fix the File and Re-Upload It (Quick & Simple)
 
-1. Use the `retailx_orders_bad_raw` table from [Step 5.2](#52--capture-actual-raw-rows-that-failed) or the exported CSV on `@retailx_error_stage`.
-2. Fix the CSV rows (manually or with a script).
-3. Re-stage the corrected file with a **new filename** (so the checksum changes), e.g., `orders_20250828_fixed.csv` in S3 or an internal stage.
-4. Load only that file:
+For one-off fixes, this is faster:
+
+1. Take the bad rows from `retailx_orders_bad_raw` (or download the error CSV from the internal stage).
+2. Fix the data — maybe correct a date format or replace "N/A" with a proper number.
+3. Save the corrected file with a **new name** (e.g., `orders_20250828_fixed.csv`) and upload it to S3.
+4. Load just that one file:
 
 ```sql
 COPY INTO retailx_orders
@@ -283,26 +331,30 @@ COPY INTO retailx_orders
   FILES = ('orders_20250828_fixed.csv');
 ```
 
-> **Warning:** Do **not** re-run `COPY` on the original file without changing the filename or without using `FORCE=TRUE`. `FORCE=TRUE` will re-load the **entire** file and duplicate already-loaded good rows. Prefer creating a new corrected file or loading fixed rows directly from an error table via `INSERT`.
+> **Important — don't re-upload with the same filename!** Snowflake remembers which files it has already loaded. If you re-upload the same file name with the same content, Snowflake will skip it (it thinks it already loaded it). You must either:
+> - Use a **different filename** (like adding `_fixed` to the name), or
+> - Use `FORCE = TRUE` — but this reloads the **entire** file, including the good rows you already loaded, causing **duplicates**
 >
-> See: [COPY INTO \<table\> — Snowflake Documentation](https://docs.snowflake.com/en/sql-reference/sql/copy-into-table)
+> The safest approach is always to use a new filename.
 
 ---
 
-## 7. Audit & Monitoring
+## 7. How to Monitor Your Loads
 
-### Row-Level Errors
+### See Errors for a Specific Load Job
 
 ```sql
 SELECT *
-FROM TABLE(VALIDATE('retailx_orders', JOB_ID => '<query_id>'));
+FROM TABLE(VALIDATE('retailx_orders', JOB_ID => '<paste_query_id_here>'));
 ```
 
-Or use `TABLE(RESULT_SCAN(LAST_QUERY_ID()))` after a `VALIDATION_MODE` load.
+This shows every error from that particular COPY job — which file, which row, what went wrong.
 
-> See: [VALIDATE — Snowflake Documentation](https://docs.snowflake.com/en/sql-reference/functions/validate)
+> See: [VALIDATE — Snowflake Docs](https://docs.snowflake.com/en/sql-reference/functions/validate)
 
-### File-Level Load History (Last 14 Days)
+---
+
+### See Load History for the Last Few Days
 
 ```sql
 SELECT *
@@ -314,50 +366,52 @@ WHERE table_name = 'RETAILX_ORDERS'
 ORDER BY last_load_time DESC;
 ```
 
-This shows which files were processed, rows loaded, and error counts.
+This shows you which files were loaded, when, how many rows succeeded, and how many errors occurred — for the last 2 days (you can adjust the range).
 
-> See: [COPY_HISTORY — Snowflake Documentation](https://docs.snowflake.com/en/sql-reference/functions/copy_history)
-
----
-
-## 8. FAQ — Quick Answers
-
-### Does `ON_ERROR = 'CONTINUE'` record the skipped row text?
-
-It records **error metadata** (line, column, error message) that you can get via `VALIDATE` or `VALIDATION_MODE`. If you want the exact original row fields, query the stage with positional `$1, $2, ...` and `TRY_` functions to capture the raw row into a table or stage.
-
-> See: [VALIDATE — Snowflake Documentation](https://docs.snowflake.com/en/sql-reference/functions/validate)
-
-### Can I automate this whole fix-and-reload?
-
-**Yes.** Wrap the steps in a **stored procedure** or **Snowflake Task**:
-
-1. `VALIDATE` or `COPY` with `CONTINUE`
-2. `VALIDATE(...)` → store errors
-3. Generate error file or error table
-4. Run cleansing stored proc / external job to fix errors
-5. Stage corrected files and `COPY` them in
-
-You can also use **Snowpipe** for continuous loads and monitor error outputs similarly.
-
-> See: [Troubleshooting Bulk Data Loads — Snowflake Documentation](https://docs.snowflake.com/en/user-guide/data-load-bulk-ts)
-
-### Should I ever use `FORCE=TRUE` to reload the same file after fixing it?
-
-Only if you're sure you want to re-load **all** rows in that file (and deduplicate later). Prefer staging corrected rows as new files or using the raw-landing & SQL-cleanse approach to avoid duplicates.
-
-> See: [COPY INTO \<table\> — Snowflake Documentation](https://docs.snowflake.com/en/sql-reference/sql/copy-into-table)
+> See: [COPY_HISTORY — Snowflake Docs](https://docs.snowflake.com/en/sql-reference/functions/copy_history)
 
 ---
 
-## 9. Recommended Production Pattern (Summary)
+## 8. Frequently Asked Questions
 
-| Principle | Details |
-|-----------|---------|
-| **Always validate first** | `VALIDATION_MODE='RETURN_ERRORS'` is low cost and prevents surprises — especially on first feed runs |
-| **Land raw data in a raw table** | Use all `STRING`/`VARIANT` columns. Use idempotent transformation SQL to push clean data to final tables and write bad rows to an error table for human review |
-| **For ad-hoc operations** | Extract bad rows using `SELECT` from stage with `TRY_` functions, write to an internal stage or table, fix, and reload only corrected files |
-| **Keep an error log** | Use `VALIDATE` / `RESULT_SCAN(LAST_QUERY_ID())` to capture error metadata and persist to a triage table |
+### When I use `ON_ERROR = 'CONTINUE'`, does Snowflake save the text of the skipped rows?
+
+**Not exactly.** It saves **error metadata** — the error message, file name, line number, and column. You can retrieve this using `VALIDATE()`. But if you want the **actual data values** from the failed rows, you need to query the stage directly with `TRY_` functions (as shown in [Approach B](#approach-b-get-the-actual-bad-rows-better-for-fixing)).
+
+---
+
+### Can I automate this whole process?
+
+**Yes!** You can wrap all of these steps into a **Stored Procedure** and schedule it with a **Snowflake Task**. The procedure would:
+
+1. Run the `COPY INTO` with `ON_ERROR = 'CONTINUE'`
+2. Capture errors using `VALIDATE()`
+3. Save error details to an error table
+4. Run a cleansing procedure to fix common issues
+5. Reload the fixed rows
+
+You can also use **Snowpipe** for continuous, automatic loading as new files arrive in S3.
+
+> See: [Troubleshooting Bulk Data Loads — Snowflake Docs](https://docs.snowflake.com/en/user-guide/data-load-bulk-ts)
+
+---
+
+### Should I use `FORCE = TRUE` to reload a file I've already loaded?
+
+**Be very careful with this.** `FORCE = TRUE` tells Snowflake to reload the file even if it already loaded it before. The problem is that it reloads **every row** in the file — including the good rows you already have. This creates **duplicate data**.
+
+**Better approach:** Give the corrected file a new name (like `_fixed.csv`) or use the raw-landing-table method where you INSERT only the rows you need.
+
+---
+
+## 9. Best Practice Summary
+
+| Practice | Why It Matters |
+|----------|---------------|
+| **Always validate first** | Running `VALIDATION_MODE = 'RETURN_ERRORS'` costs very little and tells you about every problem upfront — no surprises during the actual load |
+| **Use a raw landing table** | Loading everything as strings into a raw table means the COPY command never fails. Then you use SQL to clean and transform — you're in full control |
+| **For quick fixes, work ad-hoc** | Query the stage with `TRY_` functions to find bad rows, fix the file, rename it, and reload just that file |
+| **Always keep an error log** | Use `VALIDATE()` or `RESULT_SCAN()` to capture error details into a permanent table. You'll thank yourself when debugging issues a week later |
 
 ---
 
@@ -365,11 +419,11 @@ Only if you're sure you want to re-load **all** rows in that file (and deduplica
 
 | Topic | Link |
 |-------|------|
-| `COPY INTO <table>` (VALIDATION_MODE, ON_ERROR, PATTERN, PURGE) | [Snowflake Docs](https://docs.snowflake.com/en/sql-reference/sql/copy-into-table) |
-| `VALIDATE(table, JOB_ID => ...)` table function | [Snowflake Docs](https://docs.snowflake.com/en/sql-reference/functions/validate) |
-| `RESULT_SCAN(LAST_QUERY_ID())` — capture result sets | [Snowflake Docs](https://docs.snowflake.com/en/sql-reference/functions/result_scan) |
-| `COPY_HISTORY` / Load History for auditing | [Snowflake Docs](https://docs.snowflake.com/en/sql-reference/functions/copy_history) |
-| Querying staged file metadata (`METADATA$FILENAME`, etc.) | [Snowflake Docs](https://docs.snowflake.com/en/user-guide/querying-stage) |
-| `COPY INTO <location>` — unload data to stage | [Snowflake Docs](https://docs.snowflake.com/en/sql-reference/sql/copy-into-location) |
+| `COPY INTO <table>` — loading data (all options) | [Snowflake Docs](https://docs.snowflake.com/en/sql-reference/sql/copy-into-table) |
+| `VALIDATE()` — retrieve errors from a load job | [Snowflake Docs](https://docs.snowflake.com/en/sql-reference/functions/validate) |
+| `RESULT_SCAN()` — capture results from any query | [Snowflake Docs](https://docs.snowflake.com/en/sql-reference/functions/result_scan) |
+| `COPY_HISTORY` — audit load history | [Snowflake Docs](https://docs.snowflake.com/en/sql-reference/functions/copy_history) |
+| Querying staged files (`METADATA$FILENAME`, etc.) | [Snowflake Docs](https://docs.snowflake.com/en/user-guide/querying-stage) |
+| `COPY INTO <location>` — exporting data | [Snowflake Docs](https://docs.snowflake.com/en/sql-reference/sql/copy-into-location) |
 | Troubleshooting bulk data loads | [Snowflake Docs](https://docs.snowflake.com/en/user-guide/data-load-bulk-ts) |
 | Snowflake metadata tips | [The Information Lab](https://www.theinformationlab.nl/2022/08/26/snowflake-skills-3-metadata/) |
