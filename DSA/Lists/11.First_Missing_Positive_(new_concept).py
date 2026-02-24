@@ -12,3 +12,24 @@ class Solution:
                 return i+1
 
         return len(nums)+1
+
+# Another Solution
+
+class Solution:
+    def firstMissingPositive(self, nums: List[int]) -> int:
+        high = len(nums)
+
+        for i in range(0,len(nums)):
+            if nums[i]<1 or nums[i]>high:
+                nums[i]=high+1
+        print(nums)
+
+        for i in range(0,len(nums)):
+            if abs(nums[i])<=len(nums):
+                idx = abs(nums[i]) - 1
+                nums[idx] = -abs(nums[idx])
+        print(nums)
+        for i in range(0,len(nums)):
+            if nums[i]>0:
+                return i+1
+        return high+1
