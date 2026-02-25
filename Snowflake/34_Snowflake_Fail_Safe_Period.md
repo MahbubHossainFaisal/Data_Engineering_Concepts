@@ -1,13 +1,39 @@
+# Snowflake Fail-Safe Period
+
+## What Is This About?
+
+Imagine you've deleted some critical data. Time Travel is Snowflake's first line of defense, letting you recover data for a set period. But what happens after that retention period ends? Fail-Safe is Snowflake's last-resort safety net. It's a 7-day period after Time Travel expires during which Snowflake Support *might* be able to recover your data in a disaster scenario. This guide explains what Fail-Safe is, how it differs from Time Travel, what it costs, and why it's not a substitute for a real backup strategy.
 
 ---
 
-# 1) High-level story: what is Fail-safe and why it exists
+## Table of Contents
+
+1. [High-level story: what is Fail-safe and why it exists](#1-high-level-story-what-is-fail-safe-and-why-it-exists)
+2. [The exact definition and core rules (the “contract” you must remember)](#2-the-exact-definition-and-core-rules-the-contract-you-must-remember)
+3. [Time Travel vs Fail-safe — visualize the lifecycle](#3-time-travel-vs-fail-safe--visualize-the-lifecycle)
+4. [Transient & Temporary tables — what changes](#4-transient--temporary-tables--what-changes)
+5. [SQL examples — how to create and control retention](#5-sql-examples--how-to-create-and-control-retention)
+6. [Relationship between Time Travel retention and Fail-safe — scenarios & examples](#6-relationship-between-time-travel-retention-and-fail-safe--scenarios--examples)
+7. [Costs & storage — what you will actually pay for](#7-costs--storage--what-you-will-actually-pay-for)
+8. [Is there a size limit for Fail-safe? When could Fail-safe storage grow a lot?](#8-is-there-a-size-limit-for-fail-safe-when-could-fail-safe-storage-grow-a-lot)
+9. [Practical advice: when to use permanent vs transient tables (decision checklist)](#9-practical-advice-when-to-use-permanent-vs-transient-tables-decision-checklist)
+10. [How to recover data from Fail-safe (process overview)](#10-how-to-recover-data-from-fail-safe-process-overview)
+11. [Real-world story (scenario) — to make it stick](#11-real-world-story-scenario--to-make-it-stick)
+12. [Operational gotchas & best practices (bullet list)](#12-operational-gotchas--best-practices-bullet-list)
+13. [Questions (practice & answers)](#13-questions-practice--answers)
+14. [Quick checklist before choosing table type / retention (practical)](#14-quick-checklist-before-choosing-table-type--retention-practical)
+15. [Final summary — the must-remember points](#15-final-summary--the-must-remember-points)
+16. [References](#16-references)
+
+---
+
+## 1. High-level story: what is Fail-safe and why it exists
 
 Imagine Snowflake stores your data in a fortress. When a row is modified or a table dropped, Snowflake keeps a *recent history* (Time Travel) so you — the user — can rewind mistakes. But what if something catastrophic happens (very rare): a major internal system failure, corruption, or operator error that Time Travel can’t handle? Snowflake keeps a final safety buffer called **Fail-safe** — a short, non-configurable window during which Snowflake **may** recover your historical data *internally* (via Snowflake Support) on a best-effort basis. It’s not an extension of Time Travel for you to query; it’s an emergency recovery mechanism. ([Snowflake Docs][1])
 
 ---
 
-# 2) The exact definition and core rules (the “contract” you must remember)
+## 2. The exact definition and core rules (the “contract” you must remember)
 
 1. **Fail-safe is a Snowflake-managed, non-configurable period (7 days)** that immediately follows the end of an object’s Time Travel retention window. During Fail-safe Snowflake can attempt recovery, but regular Time Travel operations (SELECT AT, UNDROP, CLONE FROM ...) are no longer available to users. Recovery occurs only via Snowflake support and can take hours to days. ([Snowflake Docs][1])
 2. **It is not a user-accessible backup**: users cannot issue Time Travel queries against data in Fail-safe. It’s for Snowflake’s internal disaster recovery processes only. ([Snowflake Docs][1])
@@ -16,7 +42,7 @@ Imagine Snowflake stores your data in a fortress. When a row is modified or a ta
 
 ---
 
-# 3) Time Travel vs Fail-safe — visualize the lifecycle
+## 3. Time Travel vs Fail-safe — visualize the lifecycle
 
 Think of historical data lifecycle as three zones (left → right):
 
@@ -28,7 +54,7 @@ So timeline for a permanent table with 1-day Time Travel: Day 0 current → Day 
 
 ---
 
-# 4) Transient & Temporary tables — what changes
+## 4. Transient & Temporary tables — what changes
 
 * **Transient tables**: Designed for temporary/transitory data that you still want beyond a session. They *do not* have a Fail-safe period, and Time Travel retention is usually 0 or 1 day (depending on how created). Because they skip Fail-safe, they reduce storage costs but increase risk (no Snowflake recovery after Time Travel expires). Use when recoverability is not required and cost is a concern. ([Snowflake Docs][2])
 
@@ -38,7 +64,7 @@ So timeline for a permanent table with 1-day Time Travel: Day 0 current → Day 
 
 ---
 
-# 5) SQL examples — how to create and control retention
+## 5. SQL examples — how to create and control retention
 
 ```sql
 -- Permanent table with explicit Time Travel retention (days)
@@ -63,7 +89,7 @@ If you later `DROP TABLE sales_permanent;`, for that object:
 
 ---
 
-# 6) Relationship between Time Travel retention and Fail-safe — scenarios & examples
+## 6. Relationship between Time Travel retention and Fail-safe — scenarios & examples
 
 **Scenario A — short retention (1 day)**
 
@@ -85,7 +111,7 @@ If you later `DROP TABLE sales_permanent;`, for that object:
 
 ---
 
-# 7) Costs & storage — what you will actually pay for
+## 7. Costs & storage — what you will actually pay for
 
 * **Storage for historical data (Time Travel + Fail-safe)** is visible in the Snowflake UI and counts toward your account's storage costs. Fail-safe historical data is accounted for and billed (i.e., you’re billed for storage used to keep historical data). Use transient tables to avoid Fail-safe storage costs when appropriate. ([Snowflake Docs][4])
 
@@ -93,7 +119,7 @@ If you later `DROP TABLE sales_permanent;`, for that object:
 
 ---
 
-# 8) Is there a size limit for Fail-safe? When could Fail-safe storage grow a lot?
+## 8. Is there a size limit for Fail-safe? When could Fail-safe storage grow a lot?
 
 * **No documented per-table size cap** on Fail-safe in public Snowflake docs — Fail-safe stores the historical data necessary for recovery. However, moving *lots* of historical data into Fail-safe (for example, by deleting or replacing very large tables, or changing retention windows) will increase your account’s historical storage footprint and thus cost. In practice, Fail-safe storage can be large if you:
 
@@ -106,7 +132,7 @@ If you later `DROP TABLE sales_permanent;`, for that object:
 
 ---
 
-# 9) Practical advice: when to use permanent vs transient tables (decision checklist)
+## 9. Practical advice: when to use permanent vs transient tables (decision checklist)
 
 Use **permanent tables** when:
 
@@ -123,13 +149,13 @@ Also: for very sensitive, long-term backup needs you should still implement your
 
 ---
 
-# 10) How to recover data from Fail-safe (process overview)
+## 10. How to recover data from Fail-safe (process overview)
 
 * If you need Fail-safe recovery, you **must** open a Snowflake Support case. Snowflake Support will attempt recovery (this is not instantaneous and is done on a best-effort basis). Expect recovery to take hours to days, and you’ll need ACCOUNTADMIN and follow Snowflake support instructions; recovery is not guaranteed. ([community.snowflake.com][5])
 
 ---
 
-# 11) Real-world story (scenario) — to make it stick
+## 11. Real-world story (scenario) — to make it stick
 
 You’re at "DataCo" and you run a daily ETL that does `INSERT OVERWRITE` into a 5 TB `orders` permanent table. You set `DATA_RETENTION_TIME_IN_DAYS = 7` because you want to be able to recover a week’s changes.
 
@@ -139,7 +165,7 @@ Now imagine you had set `DATA_RETENTION_TIME_IN_DAYS = 90`. You discover the mis
 
 ---
 
-# 12) Operational gotchas & best practices (bullet list)
+## 12. Operational gotchas & best practices (bullet list)
 
 * **Don’t rely on Fail-safe for routine restores.** Use Time Travel and your own backups for predictable restores. Fail-safe = emergency only. ([Snowflake Docs][1])
 * **Choose transient for cheap scratch space**, but automate reproducing data (replayable ETL) because you lose Fail-safe. ([Snowflake Docs][2])
@@ -149,7 +175,7 @@ Now imagine you had set `DATA_RETENTION_TIME_IN_DAYS = 90`. You discover the mis
 
 ---
 
-# 13) Questions (practice & answers)
+## 13. Questions (practice & answers)
 
 I’ll list the question and a concise answer you should be able to give.
 
@@ -175,7 +201,7 @@ I’ll list the question and a concise answer you should be able to give.
 
 ---
 
-# 14) Quick checklist before choosing table type / retention (practical)
+## 14. Quick checklist before choosing table type / retention (practical)
 
 * Is the data reproducible from source? → **Yes** → Consider transient + short retention.
 * Is the data business-critical and hard/expensive to reproduce? → **Yes** → Permanent + appropriate Time Travel retention.
@@ -184,7 +210,7 @@ I’ll list the question and a concise answer you should be able to give.
 
 ---
 
-# 15) Final summary — the must-remember points
+## 15. Final summary — the must-remember points
 
 * **Fail-safe = 7 days, Snowflake-managed, not user-queryable, only for permanent objects, recovery via support only.** ([Snowflake Docs][1])
 * **Transient/temporary tables have no Fail-safe** — choose these when you accept irrecoverability for cost savings. ([Snowflake Docs][2])
@@ -192,9 +218,7 @@ I’ll list the question and a concise answer you should be able to give.
 * **Be cautious changing retention** — moving data into Fail-safe can temporarily increase storage usage and cost. Monitor Snowsight for historical storage. ([Snowflake Docs][1])
 
 ---
-
-
-
+## 16. References
 [1]: https://docs.snowflake.com/en/user-guide/data-failsafe?utm_source=chatgpt.com "Understanding and viewing Fail-safe"
 [2]: https://docs.snowflake.com/en/user-guide/tables-temp-transient?utm_source=chatgpt.com "Working with Temporary and Transient Tables"
 [3]: https://docs.snowflake.com/en/user-guide/data-time-travel?utm_source=chatgpt.com "Understanding & using Time Travel"
