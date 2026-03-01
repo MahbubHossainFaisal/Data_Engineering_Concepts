@@ -1,0 +1,29 @@
+- snowflake stores data in blob storages (s3, azure blob storage, google cloud storage)
+ - which are immutable, so we cannot update or delete data in place
+ - So if you perform DML operations (update, delete, merge) on a table, snowflake creates a new version of the data and marks the old version as maintained for a certain period of time (time travel) before it is eventually deleted
+ - Stream
+    - What is it?
+    - What is the purpose of it?
+    - What are the use cases for it?
+    - What does it do?
+    - How it is related to CDC (Change Data Capture)?
+    - A stream itself doesn't contain any table but stores the metadata of the changes that have occurred in the source table and return cdc records by leveraging the versioning history for the source table.
+    - What stream offset is? How does it work?
+
+- Types of streams
+    - Standard stream
+    - Append-only stream
+    
+- Stream demo
+    - Give an example of a complete stream demo, including creating a stream, performing DML operations on the source table, and querying the stream to see the changes. Show the flow using a visualization format. Can be a step by step diagram or a flowchart step by step.
+
+- what is consumer statement? Explain
+- Table -> Stream -> Consumer table
+    - Explain the relationship between the source table, stream, and consumer table. How does data flow from the source table to the stream and then to the consumer table? What are the roles of each component in this process?
+- if you have multiple consumer table for the same stream, how does it work? Does it create multiple copies of the stream or does it share the same stream? Explain the behavior and implications of having multiple consumer tables for a single stream.
+- Do we need multiple streams for multiple consumer tables? Explain the scenarios where it might be necessary to have multiple streams for different consumer tables and the benefits of doing so.
+
+- What would happen if I create a table, do some insert/updates/deletes and then create a stream on top of it? Will the stream capture the changes that were made before the stream was created? Explain the behavior of streams in this scenario and how it handles changes that occurred before its creation.
+
+
+- How Task can be associated with Stream? Explain the process of associating a task with a stream and how it can be used to automate the processing of changes captured by the stream. What are the benefits of using tasks in conjunction with streams for data processing and automation?
