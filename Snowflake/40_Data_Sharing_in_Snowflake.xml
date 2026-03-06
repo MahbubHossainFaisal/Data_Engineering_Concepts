@@ -1,0 +1,48 @@
+- How we can share data accross snowflake accounts
+    - Sending data to another account
+    - Sharing cloud services metadata with another account
+
+- How to create a share
+    - Create a share object
+    - Add database objects to the share
+    - Grant privileges on the share
+    - Add accounts to the share
+    - What is inbound and outbound shares
+    - Can you grant all privileges on a share?
+
+- How to consume a share
+    - Create a database from the share
+    - Query the shared data 
+
+- Questions
+    - Can you drop a table that is shared with another account?
+    - Can you share a table that is shared with another account?
+    - Can you clone a table that is imported as a share from another account?
+    - Can you update/drop a table that is shared with another account?
+    - Can a view be shared with another account?
+      - What is a secure view? Why you cannot share a regular view with another account but a secure view can be shared?
+      - How we can create a share with a secure view
+
+- Reader accounts
+    - What is a reader account?
+    - For what use cases we can use reader accounts. What is the purpose of reader accounts?
+    - How to create a reader account
+    - How to share data with a reader account
+    - Limitations of reader accounts
+    - Can you create a share with a reader account?
+    - What is the cost of using reader accounts? How it is billed or calculated?
+    - When consumer open a reader account, does it need warehouse, roles, users, etc? Or it is automatically created by snowflake?
+    - To create a reader account you also need to create share object? Why explain!
+    - What limitations reader accounts have?
+        - DML operations
+        - Cloning
+        - Time travel
+        - Failover and replication
+        - Data sharing
+
+
+- Data sharing significance
+    - What's the reason for data sharing?
+    - What are the benefits of data sharing?
+    - How data sharing can help in data collaboration and data monetization?
+    - What are the use cases of data sharing in real world scenarios?
