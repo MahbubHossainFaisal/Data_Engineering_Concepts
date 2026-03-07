@@ -11,6 +11,9 @@ Requirements
     - Git for versioning
 
 
-Concept covered 
-    - AWS S3
-        - 
+-- Localstack setup to replicate AWS behavior
+    - Done
+
+-- Snowflake tasks
+    - Create database
+    - 
