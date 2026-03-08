@@ -76,3 +76,31 @@ CREATE INDEX IF NOT EXISTS IDX_LISTINGS_CITY ON STAGING.LISTINGS(CITY);
 DESCRIBE TABLE STAGING.HOSTS;
 DESCRIBE TABLE STAGING.LISTINGS;
 DESCRIBE TABLE STAGING.BOOKINGS;
+
+
+-- Create a dedicated schema for metadata objects (Industry Best Practice)
+CREATE SCHEMA IF NOT EXISTS AIRBNB_DWH.METADATA;
+
+-- Create the reusable CSV File Format
+CREATE OR REPLACE FILE FORMAT AIRBNB_DWH.METADATA.CSV_LOAD_FORMAT
+  TYPE = 'CSV'
+  FIELD_DELIMITER = ','
+  SKIP_HEADER = 1          -- Skips the column names in your CSV
+  FIELD_OPTIONALLY_ENCLOSED_BY = '"'
+  NULL_IF = ('NULL', 'null', '')
+  EMPTY_FIELD_AS_NULL = TRUE
+  DATE_FORMAT = 'AUTO'
+  TIMESTAMP_FORMAT = 'AUTO';
+
+CREATE OR REPLACE STAGE AIRBNB_DWH.METADATA.LOCALSTACK_AIRBNB_STAGE
+  URL = 's3compat://snowflake-bucket/source-data/'
+  ENDPOINT = 'semispontaneous-melia-trimeric.ngrok-free.app' 
+  CREDENTIALS = (
+    AWS_KEY_ID = 'LKIAQAAAAAAAK2XAAOVG'
+    AWS_SECRET_KEY = 'IL60LxCq+VRGMIuZ3gyv3LPRTr7AEuyQoRJIWQdh'
+  )
+  FILE_FORMAT = AIRBNB_DWH.METADATA.CSV_LOAD_FORMAT;
+-- Verification
+LIST @AIRBNB_DWH.METADATA.LOCALSTACK_AIRBNB_STAGE;
+
+-- FInally I couldn't do it! Because Snowflake doesn't support any unknown localhosts/URL endpoints.
