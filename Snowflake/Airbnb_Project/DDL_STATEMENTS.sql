@@ -1,6 +1,7 @@
 
 
-
+-- ============================================================
+Snowflake does not support any unknown localhosts/URL endpoints. So it will not support localstack
 
 -- ============================================================
 -- Snowflake DDL for Airbnb Project

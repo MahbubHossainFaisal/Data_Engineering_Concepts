@@ -1,0 +1,34 @@
+# Virtual Environments
+venv/
+.venv/
+env/
+bin/
+lib/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# dbt
+dbt_modules/
+dbt_packages/
+
+# Logs
+logs/
+*.log
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
